@@ -4,7 +4,7 @@ import { align_items_center, align_self_center, bg_danger, bg_dark, bg_primary, 
 import { mergeStyles } from '../../utils/style-helpers';
 import { Tab, Text, TabView, Button, Divider, Dialog } from '@rneui/themed';
 import { BlurView } from '@react-native-community/blur';
-import { InputField, InputFieldRef } from '../../components/InputField';
+import { InputField, InputFieldRef } from '../../../components/InputField';
 import { Authenticate } from '../../screen_handlers/Authenticate';
 import { debounce, Prioritizer } from '../../utils/ultilities';
 

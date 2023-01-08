@@ -17,13 +17,13 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import Authentication from './screens/Authentication/Authentication';
-import { bg_dark, flex_1 } from './stylesheets/primary-styles';
+import Authentication from './src/screens/Authentication/Authentication';
+import { bg_dark, flex_1 } from './src/stylesheets/primary-styles';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Home from './screens/Home/Home';
-import { Test } from './screens/Test/Test';
-import { Test2 } from './screens/Test/Test2';
-import LocationPicker from './screens/Home/HomeTab/LocationPicker';
+import Home from './src/screens/Home/Home';
+import { Test } from './src/screens/Test/Test';
+import { Test2 } from './src/screens/Test/Test2';
+import LocationPicker from './src/screens/Home/HomeTab/LocationPicker';
 
 const Stack = createNativeStackNavigator()
 
