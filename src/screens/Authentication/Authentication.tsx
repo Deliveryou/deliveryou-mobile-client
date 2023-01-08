@@ -4,7 +4,7 @@ import { align_items_center, align_self_center, bg_danger, bg_dark, bg_primary, 
 import { mergeStyles } from '../../utils/style-helpers';
 import { Tab, Text, TabView, Button, Divider, Dialog } from '@rneui/themed';
 import { BlurView } from '@react-native-community/blur';
-import { InputField, InputFieldRef } from '../../../components/InputField';
+import { InputField, InputFieldRef } from '../../components/InputField';
 import { Authenticate } from '../../screen_handlers/Authenticate';
 import { debounce, Prioritizer } from '../../utils/ultilities';
 
@@ -127,20 +127,20 @@ export default function Authentication({ navigation }, args: any) {
     style = useMemo(() => mergeStyles(style), [args.style])
 
     return (
-        <SafeAreaView style={[flex_1, bg_dark]}>
+        <View style={[flex_1, bg_dark]}>
             <StatusBar
                 barStyle={'dark-content'}
                 backgroundColor={'transparent'}
                 translucent
             />
-            <ImageBackground source={require('../resources/backgrounds/authentication.webp')} style={[flex_1]}>
+            <ImageBackground source={require('../../resources/backgrounds/authentication.webp')} style={[flex_1]}>
                 <BlurView
                     style={styles.topLogoWrapper}
                     blurAmount={14}
                     blurType='light'
                     overlayColor=''>
-                    <Image style={styles.topLogo} source={require('../resources/brand/logo-dark.png')} />
-                    <View style={position_relative}>
+                    <Image style={styles.topLogo} source={require('../../resources/brand/logo-dark.png')} />
+                    <View style={[position_relative]}>
                         <Tab
                             style={position_relative}
                             containerStyle={position_relative}
@@ -182,7 +182,7 @@ export default function Authentication({ navigation }, args: any) {
                 </TabView>
 
             </ImageBackground>
-        </SafeAreaView>
+        </View>
     )
 }
 

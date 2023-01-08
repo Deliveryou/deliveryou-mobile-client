@@ -1,5 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
-import React, { type PropsWithChildren } from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -27,20 +27,29 @@ import LocationPicker from './src/screens/Home/HomeTab/LocationPicker';
 
 const Stack = createNativeStackNavigator()
 
-const springAnimationConfig = {
-  animation: 'spring',
-  config: {
-    stiffness: 1000,
-    damping: 500,
-    mass: 3,
-    overshootClamping: true,
-    restDisplacementThreshold: 0.01,
-    restSpeedThreshold: 0.01,
-  },
-};
+const HomeScreen = () => {
+  return (
+    <Stack.Navigator screenOptions={{
+      headerShown: false
+    }}
+    >
+      <Stack.Screen
+        name='home'
+        component={Home} />
+      <Stack.Screen
+        name='locationPicker'
+        component={LocationPicker}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+    </Stack.Navigator>
+  )
+}
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
+  const [isAuthenticated, setisAuthenticated] = useState(false)
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
@@ -52,28 +61,19 @@ const App = () => {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen
-          name='test'
-          component={Test} />
-        <Stack.Screen
-          name='test2'
-          component={Test2}
-           /> */}
-        <Stack.Screen
-          name='home'
-          component={Home} />
-        <Stack.Screen
-          name='locationPicker'
-          component={LocationPicker}
-          options={{
-
-          }}
-        />
-        {/* <Stack.Screen
-          name='Auth'
-          component={Authentication}
-          options={{ title: 'welcome' }} /> */}
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+      >
+        {
+          (isAuthenticated) ?
+            <Stack.Screen
+              name='homeScreen'
+              component={HomeScreen}
+            /> :
+            <Stack.Screen
+              name='authenticationScreen'
+              component={Authentication} />
+        }
       </Stack.Navigator>
     </NavigationContainer>
   );
