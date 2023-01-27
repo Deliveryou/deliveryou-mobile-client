@@ -7,10 +7,9 @@ import { Global } from '../../../../Global';
 import Address from '../../../../entities/Address';
 import LinearGradient from 'react-native-linear-gradient';
 import Geolocation from 'react-native-geolocation-service';
-import LocationService from '../../../../services/LocationService';
 import axios from 'axios'
 import NetInfo from '@react-native-community/netinfo'
-import PropTypes, { Requireable } from 'prop-types';
+import PropTypes from 'prop-types';
 
 const emptyObject = {}
 const PICKUP_LOC_INDEX = 0
@@ -155,7 +154,8 @@ namespace SuggestionItem {
 
     Item.propTypes = {
         header: PropTypes.shape({
-
+            content: PropTypes.string,
+            disabled: PropTypes.bool
         }),
         onItemPressed: PropTypes.func,
         icon: PropTypes.shape({
@@ -172,6 +172,11 @@ namespace SuggestionItem {
     }
 
     Item.defaultProps = {
+        header: {
+            style: [Style.fontSize(14), fw_500, Style.backgroundColor('#cfbaf0'), border_radius_pill, px_10],
+            content: 'Title',
+            disabled: false
+        },
         icon: {
             name: 'location',
             type: 'entypo',
