@@ -1,18 +1,22 @@
-import { View, StyleSheet, ImageBackground, StatusBar, Image, Dimensions, ScrollView, TextInput, Pressable, StyleProp, ViewStyle, Modal } from 'react-native';
+import { View, StyleSheet, ImageBackground, BackHandler, StatusBar, Image, Dimensions, ScrollView, TextInput, Pressable, StyleProp, ViewStyle, Modal, ToastAndroid, Alert } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react'
-import { align_items_center, align_self_flex_start, bg_black, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_1, border_radius_2, border_radius_4, clr_white, flex_1, flex_7, flex_column, flex_row, fs_semi_large, fw_400, fw_600, fw_700, fw_800, h_100, h_50, justify_center, left_0, mb_10, mb_15, mr_10, position_absolute, right_0, Style, top_0, w_100 } from '../../../stylesheets/primary-styles';
+import { align_items_center, align_self_flex_start, bg_black, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_1, border_radius_2, border_radius_4, clr_white, flex_1, flex_7, flex_column, flex_row, fs_semi_large, fw_400, fw_600, fw_700, fw_800, h_100, h_50, justify_center, left_0, mb_10, mb_15, mr_10, position_absolute, right_0, Style, top_0, w_100 } from '../../../../stylesheets/primary-styles';
 import { Icon, Text, Button } from '@rneui/themed';
-import { Global } from '../../../stylesheets/Global';
+import { Global } from '../../../../Global';
 import { Shadow } from 'react-native-shadow-2';
 import { BlurView } from '@react-native-community/blur';
+import LocationService from '../../../../services/LocationService';
+
+// *************** REGULAR USER HOME TAB *****************
 
 interface LocationSelectorProps {
     style?: StyleProp<ViewStyle>,
-    setModalVisibleCallback?: React.Dispatch<React.SetStateAction<boolean>>
+    setModalVisibleCallback?: React.Dispatch<React.SetStateAction<boolean>>,
+    navigation: Object
 }
 
 const LocationSelector = (props: LocationSelectorProps) => {
-    const { style, setModalVisibleCallback } = props
+    const { style, setModalVisibleCallback, navigation } = props
     console.log('hometab rendered')
 
     return (
@@ -22,7 +26,10 @@ const LocationSelector = (props: LocationSelectorProps) => {
             </Pressable>
             <Pressable
                 style={[flex_row, align_items_center]}
-                onPress={() => setModalVisibleCallback?.(value => !value)}
+                onPress={() => {
+                    //setModalVisibleCallback?.(value => !value)
+                    openLocationPicker(navigation)
+                }}
             >
                 <Icon name='gps-fixed' type='MaterialIcons' style={mr_10} color='#ef476f' />
                 <TextInput placeholder='ldkfgnbfdkjn' editable={false} />
@@ -30,7 +37,10 @@ const LocationSelector = (props: LocationSelectorProps) => {
             <Icon name='dots-three-vertical' type='entypo' style={align_self_flex_start} color='#a5a58d' />
             <Pressable
                 style={[flex_row, align_items_center]}
-                onPress={() => setModalVisibleCallback?.(value => !value)}
+                onPress={() => {
+                    //setModalVisibleCallback?.(value => !value)
+                    openLocationPicker(navigation)
+                }}
             >
                 <Icon name='location' type='entypo' style={mr_10} color='#118ab2' />
                 <TextInput placeholder='ldkfgnbfdkjn' editable={false} />
@@ -51,10 +61,28 @@ const onLayoutImgBg = (event: any, setStateFunction: React.Dispatch<React.SetSta
     setStateFunction(prev => prev + 1)
 }
 
+const openLocationPicker = (navigation: Object) => {
+    navigation?.navigate?.('locationPicker')
+}
+
 export default function HomeTab(props: HomeTabProps) {
     const topImageSize = useRef<{ width: number, height: number }>()
     const [triggerRererender, setTriggerRererender] = useState(0)
-    const [modalVisible, setModalVisible] = useState(false);
+    useEffect(() => {
+        LocationService.requestGeolocation(
+            () => { },
+            () => {
+                Alert.alert(
+                    "Location access is not permitted",
+                    "Grant permission to continue",
+                    []
+                );
+                setTimeout(() => BackHandler.exitApp(), 4000)
+            }
+        )
+    }, [])
+
+    // const [modalVisible, setModalVisible] = useState(false);
 
     const tmp = Global.Screen.Home.Variable
     const contentHeight = Dimensions.get('screen').height - tmp.NAV_BAR_HEIGHT.get() - tmp.TOP_IMAGE_BG_HEIGHT.get() + 50
@@ -64,7 +92,7 @@ export default function HomeTab(props: HomeTabProps) {
         <>
             <ImageBackground
                 style={styles.topImageBg}
-                source={require('../../../resources/backgrounds/topImageBg.jpg')}
+                source={require('../../../../resources/backgrounds/topImageBg.jpg')}
                 onLayout={(event) => onLayoutImgBg(event, setTriggerRererender)}>
                 <View style={styles.topImageTextContainer}>
                     <Text style={[fs_semi_large, fw_800, mb_10, imgBgTextClr]}>Welcome To Deliveryou</Text>
@@ -81,7 +109,8 @@ export default function HomeTab(props: HomeTabProps) {
                     >
                         <LocationSelector
                             style={[styles.topCard,]}
-                            setModalVisibleCallback={setModalVisible} />
+                            //setModalVisibleCallback={setModalVisible} 
+                            navigation={props.navigation} />
                     </Shadow>
                     <Button title={'VIEW ESTIMATED PRICE'} color={'#38b000'} containerStyle={border_radius_2} />
                     <View>
@@ -99,9 +128,7 @@ export default function HomeTab(props: HomeTabProps) {
                             <View style={[Style.dimen(100, 100), bg_dark, mr_10]} />
                         </ScrollView>
                     </View>
-                    <Button title={'dfkgnl'} onPress={() => {
-                        props.navigation?.navigate?.('locationPicker')
-                    }} />
+                    <Button title={'dfkgnl'} onPress={() => openLocationPicker(props.navigation)} />
                 </View>
             </ScrollView>
 

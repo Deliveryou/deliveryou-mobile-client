@@ -892,6 +892,18 @@ export const align_self_stretch = {
 // -------------------------------
 
 export class Style {
+    static padding(value: number) {
+        return { paddingVertical: value, paddingHorizontal: value }
+    }
+
+    static paddingX(value: number) {
+        return { paddingHorizontal: value }
+    }
+
+    static paddingY(value: number) {
+        return { paddingVertical: value }
+    }
+
     static height(value: string | number) {
         return { height: value }
     }
@@ -908,11 +920,23 @@ export class Style {
         return { height: height, width: width }
     }
 
+    static fontSize(value: number) {
+        return { fontSize: value }
+    }
+
+    static textColor(value: string) {
+        return { color: value }
+    }
+
     static border(color?: ColorValue, width?: number, style?: 'solid' | 'dotted' | 'dashed') {
         return {
             borderColor: color,
             borderWidth: width,
             borderStyle: style
         }
+    }
+
+    static backgroundColor(value: string) {
+        return { backgroundColor: value }
     }
 }

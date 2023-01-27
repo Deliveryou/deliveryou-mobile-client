@@ -1,20 +1,21 @@
 import { TabView } from '@rneui/themed'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { ScrollView } from 'react-native'
+import { Global } from '../../Global'
 import { bg_transparent, bg_warning, bg_white, flex_1, justify_center, px_10, size_fill, w_100 } from '../../stylesheets/primary-styles'
-import HistoryTab from './HistoryTab/HistoryTab'
-import HomeTab from './HomeTab/HomeTab'
-
+import ActivityTab from './Common/Acitivity/ActivityTab'
+import ChatTab from './Common/Chat/ChatTab'
+import RegularUserHomeTab from './RegularUser/HomeTab/HomeTab'
+import ShipperHomeTab from './Shipper/HomeTab/HomeTab'
 
 interface TabViewsProps {
     value: number,
     onChange?: ((value: number) => any),
-    navigation?: Object
+    navigation?: Object,
+    userType: Global.User.Type.REGULAR_USER | Global.User.Type.SHIPPER
 }
 
-export default function Home_TabContents(props: TabViewsProps) {
-    console.log('render: tabviews')
-    //const [disableTabSwipe, setDisableTabSwipe] = useState(false)
+export default function MainTabContainer(props: TabViewsProps) {
 
     return (
         <TabView
@@ -24,17 +25,18 @@ export default function Home_TabContents(props: TabViewsProps) {
             disableSwipe={true}
         >
             <TabView.Item style={[w_100, bg_transparent, flex_1]}>
-                <HomeTab navigation={props.navigation} />
+                {
+                    (props.userType === Global.User.Type.REGULAR_USER) ?
+                        <RegularUserHomeTab navigation={props.navigation} />
+                        :
+                        <ShipperHomeTab />
+                }
             </TabView.Item>
             <TabView.Item style={[w_100, bg_transparent]}>
-                <HistoryTab />
+                <ActivityTab />
             </TabView.Item>
             <TabView.Item style={[w_100, bg_transparent]}>
-                <ScrollView
-                    style={[size_fill, px_10, bg_warning]}
-                    contentContainerStyle={[flex_1, justify_center]}>
-
-                </ScrollView>
+                <ChatTab />
             </TabView.Item>
             <TabView.Item style={[w_100, bg_transparent]}>
                 <ScrollView

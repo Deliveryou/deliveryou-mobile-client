@@ -138,12 +138,11 @@ export default function Authentication({ navigation }, args: any) {
                     style={styles.topLogoWrapper}
                     blurAmount={14}
                     blurType='light'
-                    overlayColor=''>
+                    overlayColor=''
+                >
                     <Image style={styles.topLogo} source={require('../../resources/brand/logo-dark.png')} />
-                    <View style={[position_relative]}>
+                    <View>
                         <Tab
-                            style={position_relative}
-                            containerStyle={position_relative}
                             value={index}
                             onChange={(e) => setIndex(e)}
                             indicatorStyle={{
@@ -192,15 +191,13 @@ const CLR_BLUR = 'rgba(255, 255, 255, 0.55)'
 const styles = StyleSheet.create({
     topLogoWrapper: {
         backgroundColor: CLR_BLUR,
-        display: 'flex',
+        flexDirection: 'column'
     },
     topLogo: {
         ...w_100,
         height: 100,
         ...resize_center,
         marginTop: MARGIN_TOP,
-        position: 'relative',
-        zIndex: 12,
     },
 })
 

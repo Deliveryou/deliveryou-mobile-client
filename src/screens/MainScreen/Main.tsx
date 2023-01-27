@@ -3,8 +3,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import { bg_black, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_pill, bottom_0, clr_dark, flex_1, flex_column, flex_column_reverse, float_bottom, fs_normal, justify_center, position_absolute, position_relative, px_10, size_fill, Style, text_black, text_dark, text_primary, w_100 } from '../../stylesheets/primary-styles';
 import { Tab, Text, TabView, Input } from '@rneui/themed';
 import { BlurView } from '@react-native-community/blur';
-import { Global } from '../../stylesheets/Global';
-import Home_TabViews from './Home_TabContents';
+import { Global } from '../../Global';
+import MainTabContainer from './MainTabContainer';
 
 const tabItemThemeClr = Global.Color.PRIMARY_THEME
 const tabItemBlurClr = '#463f3a'
@@ -20,8 +20,7 @@ function getStatusBarStyle(index: number): StatusBarStyle {
 }
 
 
-export default function Home({ navigation }) {
-    console.log('render: home')
+export default function Main({ navigation, route }) {
     const [index, setIndex] = useState(0);
     const [focusedTab, setFocusedTab] = useState(0)
 
@@ -67,9 +66,9 @@ export default function Home({ navigation }) {
                             icon={{ name: 'home', type: 'entypo', color: getIconClr(0) }}
                             onPressIn={() => setFocusedTab(0)} />
                         <Tab.Item
-                            title="History"
+                            title="Activity"
                             titleStyle={getTitleStyle(1)}
-                            icon={{ name: 'history', type: 'fontawesome', color: getIconClr(1) }}
+                            icon={{ name: 'list-alt', type: 'fontawesome5', color: getIconClr(1) }}
                             onPressIn={() => setFocusedTab(1)} />
                         <Tab.Item
                             title="Chat"
@@ -84,10 +83,12 @@ export default function Home({ navigation }) {
                     </Tab>
                 </BlurView>
 
-                <Home_TabViews
+                <MainTabContainer
                     value={index}
                     onChange={tabSwiped}
-                    navigation={navigation} />
+                    navigation={navigation}
+                    userType={route.params?.userType}
+                />
             </View>
         </View>
     )
