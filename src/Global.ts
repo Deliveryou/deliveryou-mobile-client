@@ -48,7 +48,7 @@ export namespace Global {
 
         class User {
             // type: Type = Type.ANONYMOUS
-            type: Type = Type.REGULAR_USER
+            type: Type = Type.SHIPPER
 
             isRegularUser() {
                 return this.type === Type.REGULAR_USER
@@ -62,16 +62,6 @@ export namespace Global {
         }
 
         export const CurrentUser = new User()
-    }
-
-    export namespace API {
-        export namespace LocationIQ {
-            const ACCESS_TOKEN = 'pk.064b929ae3a07985e0bfe488d648b455'
-
-            export function buildEndPoint(latitude: number, longitude: number) {
-                return `https://us1.locationiq.com/v1/reverse?key=${ACCESS_TOKEN}&lat=${latitude}&lon=${longitude}&format=json`
-            }
-        }
     }
 
     export namespace DefaultFilterChain {

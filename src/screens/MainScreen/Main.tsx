@@ -70,11 +70,14 @@ export default function Main({ navigation, route }) {
                             titleStyle={getTitleStyle(1)}
                             icon={{ name: 'list-alt', type: 'fontawesome5', color: getIconClr(1) }}
                             onPressIn={() => setFocusedTab(1)} />
-                        <Tab.Item
-                            title="Chat"
-                            titleStyle={getTitleStyle(2)}
-                            icon={{ name: 'message', type: 'materialcommunityicons', color: getIconClr(2) }}
-                            onPressIn={() => setFocusedTab(2)} />
+                        {
+                            (route.params?.userType === Global.User.Type.REGULAR_USER) ?
+                                <Tab.Item
+                                    title="Chat"
+                                    titleStyle={getTitleStyle(2)}
+                                    icon={{ name: 'message', type: 'materialcommunityicons', color: getIconClr(2) }}
+                                    onPressIn={() => setFocusedTab(2)} /> : null
+                        }
                         <Tab.Item
                             title="Profile"
                             titleStyle={getTitleStyle(3)}
@@ -88,6 +91,7 @@ export default function Main({ navigation, route }) {
                     onChange={tabSwiped}
                     navigation={navigation}
                     userType={route.params?.userType}
+                    route={route}
                 />
             </View>
         </View>

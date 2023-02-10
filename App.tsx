@@ -27,25 +27,36 @@ import { Test2 } from './src/screens/Test/Test2';
 import LocationPicker from './src/screens/MainScreen/RegularUser/HomeTab/LocationPicker';
 import { Global } from './src/Global';
 import NetInfo, { useNetInfo, NetInfoState } from '@react-native-community/netinfo';
+import AddDeliveryDetails from './src/screens/MainScreen/RegularUser/HomeTab/AddDeliveryDetails';
 
 const Stack = createNativeStackNavigator()
 
 const MainScreen = () => {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName='Main' screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name='Main'
         component={Main}
         initialParams={{ userType: Global.User.CurrentUser.type }} />
       {
         (Global.User.CurrentUser.isRegularUser()) ?
-          <Stack.Screen
-            name='locationPicker'
-            component={LocationPicker}
-            options={{
-              animation: 'slide_from_right',
-            }}
-          /> : null
+          <>
+            <Stack.Screen
+              name='LocationPicker'
+              component={LocationPicker}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='AddDeliveryDetails'
+              component={AddDeliveryDetails}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+          </>
+          : null
       }
     </Stack.Navigator>
   )
@@ -84,15 +95,6 @@ function showAlert() {
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
   const [isAuthenticated, setAuthenticated] = useState(true)
-  const netInfo = useNetInfo({
-    reachabilityUrl: 'https://clients3.google.com/generate_204',
-    reachabilityTest: async (response) => response.status === 204,
-    reachabilityLongTimeout: 60 * 1000, // 60s
-    reachabilityShortTimeout: 5 * 1000, // 5s
-    reachabilityRequestTimeout: 15 * 1000, // 15s
-    reachabilityShouldRun: () => true,
-    useNativeReachability: false
-  })
 
   useEffect(() => {
     NetInfo.fetch().then(state => {

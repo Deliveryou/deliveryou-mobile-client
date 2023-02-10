@@ -37,6 +37,16 @@ export function throttle(callback: Function, delay: number = 1000) {
 
 }
 
+/**
+ * Automatically re-excecute callback if its returned value is false
+ * @param callback must return a boolean value determining result state
+ */
+export async function retriable(callback: () => Promise<boolean>) {
+  let retry = true
+  while (retry === true)
+    retry = !(await callback())
+}
+
 export const delay = (miliseconds: number) => new Promise(res => setTimeout(res, miliseconds));
 
 export namespace Prioritizer {
@@ -98,3 +108,7 @@ export namespace Prioritizer {
     }
   }
 }
+
+export type ObtainKeys<Obj, Type> = {
+  [Prop in keyof Obj]: Obj[Prop] extends Type ? Prop : never
+}[keyof Obj]

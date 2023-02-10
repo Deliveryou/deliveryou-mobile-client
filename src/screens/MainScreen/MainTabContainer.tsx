@@ -11,7 +11,8 @@ import ShipperHomeTab from './Shipper/HomeTab/HomeTab'
 interface TabViewsProps {
     value: number,
     onChange?: ((value: number) => any),
-    navigation?: Object,
+    navigation: Object,
+    route: Object,
     userType: Global.User.Type.REGULAR_USER | Global.User.Type.SHIPPER
 }
 
@@ -27,7 +28,10 @@ export default function MainTabContainer(props: TabViewsProps) {
             <TabView.Item style={[w_100, bg_transparent, flex_1]}>
                 {
                     (props.userType === Global.User.Type.REGULAR_USER) ?
-                        <RegularUserHomeTab navigation={props.navigation} />
+                        <RegularUserHomeTab
+                            navigation={props.navigation}
+                            route={props.route}
+                        />
                         :
                         <ShipperHomeTab />
                 }
@@ -35,9 +39,12 @@ export default function MainTabContainer(props: TabViewsProps) {
             <TabView.Item style={[w_100, bg_transparent]}>
                 <ActivityTab />
             </TabView.Item>
-            <TabView.Item style={[w_100, bg_transparent]}>
-                <ChatTab />
-            </TabView.Item>
+            {
+                (props.userType === Global.User.Type.REGULAR_USER) ?
+                    <TabView.Item style={[w_100, bg_transparent]}>
+                        <ChatTab />
+                    </TabView.Item> : null
+            }
             <TabView.Item style={[w_100, bg_transparent]}>
                 <ScrollView
                     style={[size_fill, px_10, bg_white]}

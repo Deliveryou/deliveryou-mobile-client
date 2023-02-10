@@ -495,6 +495,9 @@ export const mx_25 = {
 }
 
 // -------------------------------
+export const border_radius_0 = {
+    borderRadius: 0
+}
 
 export const border_radius_1 = {
     borderRadius: 5
@@ -890,45 +893,67 @@ export const align_self_stretch = {
 }
 
 // -------------------------------
+export namespace Style {
+    export namespace fonts {
+        export namespace Raleway {
+            export const Black = 'Raleway-Black'
+            export const BlackItalic = 'Raleway-BlackItalic'
+            export const Bold = 'Raleway-Bold'
+            export const BoldItalic = 'Raleway-BoldItalic'
+            export const ExtraBold = 'Raleway-ExtraBold'
+            export const ExtraBoldItalic = 'Raleway-ExtraBoldItalic'
+            export const ExtraLight = 'Raleway-ExtraLight'
+            export const ExtraLightItalic = 'Raleway-ExtraLightItalic'
+            export const Italic = 'Raleway-Italic'
+            export const Light = 'Raleway-Light'
+            export const LightItalic = 'Raleway-LightItalic'
+            export const Medium = 'Raleway-Medium'
+            export const MediumItalic = 'Raleway-MediumItalic'
+            export const Regular = 'Raleway-Regular'
+            export const SemiBold = 'Raleway-SemiBold'
+            export const SemiBoldItalic = 'Raleway-SemiBoldItalic'
+            export const Thin = 'Raleway-Thin'
+            export const ThinItalic = 'Raleway-ThinItalic'
+        }
+    }
 
-export class Style {
-    static padding(value: number) {
+    export function padding(value: number) {
         return { paddingVertical: value, paddingHorizontal: value }
     }
 
-    static paddingX(value: number) {
+    export function paddingX(value: number) {
         return { paddingHorizontal: value }
     }
 
-    static paddingY(value: number) {
+    export function paddingY(value: number) {
         return { paddingVertical: value }
     }
 
-    static height(value: string | number) {
+    export function height(value: string | number) {
         return { height: value }
     }
 
-    static width(value: string | number) {
+    export function width(value: string | number) {
         return { width: value }
     }
 
-    static square(value: number) {
+    export function square(value: number) {
         return { width: value, height: value }
     }
 
-    static dimen(height: string | number, width: string | number) {
+    export function dimen(height: string | number, width: string | number) {
         return { height: height, width: width }
     }
 
-    static fontSize(value: number) {
+    export function fontSize(value: number) {
         return { fontSize: value }
     }
 
-    static textColor(value: string) {
+    export function textColor(value: string) {
         return { color: value }
     }
 
-    static border(color?: ColorValue, width?: number, style?: 'solid' | 'dotted' | 'dashed') {
+    export function border(color?: ColorValue, width?: number, style?: 'solid' | 'dotted' | 'dashed') {
         return {
             borderColor: color,
             borderWidth: width,
@@ -936,7 +961,11 @@ export class Style {
         }
     }
 
-    static backgroundColor(value: string) {
+    export function backgroundColor(value: string) {
         return { backgroundColor: value }
+    }
+
+    export function rotate(value: string) {
+        return { transform: [{ rotate: value }] }
     }
 }
