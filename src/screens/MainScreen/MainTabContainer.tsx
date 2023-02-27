@@ -33,7 +33,10 @@ export default function MainTabContainer(props: TabViewsProps) {
                             route={props.route}
                         />
                         :
-                        <ShipperHomeTab />
+                        <ShipperHomeTab
+                            navigation={props.navigation}
+                            route={props.route}
+                        />
                 }
             </TabView.Item>
             <TabView.Item style={[w_100, bg_transparent]}>

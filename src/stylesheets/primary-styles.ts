@@ -961,6 +961,10 @@ export namespace Style {
         }
     }
 
+    export function borderRadius(value: number) {
+        return { borderRadius: value }
+    }
+
     export function backgroundColor(value: string) {
         return { backgroundColor: value }
     }

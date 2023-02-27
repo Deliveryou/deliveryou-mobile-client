@@ -28,6 +28,8 @@ import LocationPicker from './src/screens/MainScreen/RegularUser/HomeTab/Locatio
 import { Global } from './src/Global';
 import NetInfo, { useNetInfo, NetInfoState } from '@react-native-community/netinfo';
 import AddDeliveryDetails from './src/screens/MainScreen/RegularUser/HomeTab/AddDeliveryDetails';
+import MatchingOptions from './src/screens/MainScreen/Shipper/HomeTab/MatchingOptions';
+import OngoingDelivery from './src/screens/MainScreen/Shipper/HomeTab/OngoingDelivery';
 
 const Stack = createNativeStackNavigator()
 
@@ -57,6 +59,25 @@ const MainScreen = () => {
             />
           </>
           : null
+      }
+      {
+        (Global.User.CurrentUser.isShipper()) ?
+          <>
+            <Stack.Screen
+              name='MatchingOptions'
+              component={MatchingOptions}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='OngoingDelivery'
+              component={OngoingDelivery}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+          </> : null
       }
     </Stack.Navigator>
   )
