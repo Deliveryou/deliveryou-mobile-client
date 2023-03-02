@@ -7,6 +7,7 @@ import ActivityTab from './Common/Acitivity/ActivityTab'
 import ChatTab from './Common/Chat/ChatTab'
 import RegularUserHomeTab from './RegularUser/HomeTab/HomeTab'
 import ShipperHomeTab from './Shipper/HomeTab/HomeTab'
+import ShipperProfileTab from './Shipper/ProfileTab/ProfileTab'
 
 interface TabViewsProps {
     value: number,
@@ -49,11 +50,15 @@ export default function MainTabContainer(props: TabViewsProps) {
                     </TabView.Item> : null
             }
             <TabView.Item style={[w_100, bg_transparent]}>
-                <ScrollView
-                    style={[size_fill, px_10, bg_white]}
-                    contentContainerStyle={[flex_1, justify_center]}>
-
-                </ScrollView>
+                {
+                    (props.userType === Global.User.Type.REGULAR_USER) ?
+                        null
+                        :
+                        <ShipperProfileTab
+                            navigation={props.navigation}
+                            route={props.route}
+                        />
+                }
             </TabView.Item>
         </TabView>
     )

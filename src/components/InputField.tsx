@@ -4,6 +4,7 @@ import { align_items_center, align_items_start, bg_black, bg_danger, bg_dark, bg
 import { mergeStyles } from '../utils/style-helpers';
 import { BlurView } from '@react-native-community/blur';
 import { Tooltip, TooltipProps } from '@rneui/themed'
+import { KeyboardTypeOptions } from 'react-native';
 
 const CLR_FOCUS_BORDER = 'rgb(100, 100, 100)'
 
@@ -48,6 +49,7 @@ interface PROPS {
     | 'newPassword'
     | 'oneTimeCode',
     secureTextEntry?: boolean,
+    keyboardType?: KeyboardTypeOptions
 }
 
 export class InputFieldRef {
@@ -83,7 +85,7 @@ const ControlledTooltip: React.FC<TooltipProps> = (props) => {
 export const InputField = React.forwardRef<InputFieldRef>((props: PROPS, ref) => {
     let { containerStyle, placeholder, caretHidden, onFocusPlaceholderStyle,
         onBlurPlaceholderStyle, returnKeyType, onSubmitEditing, blurOnSubmit,
-        onChangeText, inputStyle, textContentType, secureTextEntry } = props
+        onChangeText, inputStyle, textContentType, secureTextEntry, keyboardType } = props
     const [focus, setFocus] = useState(false)
     const [isInvalid, setInvalid] = useState(false)
     const inputValue = useRef('')
@@ -165,7 +167,8 @@ export const InputField = React.forwardRef<InputFieldRef>((props: PROPS, ref) =>
                             input.current = i
                         }}
                         textContentType={textContentType}
-                        secureTextEntry={secureTextEntry} />
+                        secureTextEntry={secureTextEntry}
+                        keyboardType={keyboardType} />
                 </BlurView>
             </View>
         </View>
@@ -200,8 +203,8 @@ const styles = StyleSheet.create({
         ...border_radius_pill
     },
     invalid: {
-        borderColor: 'rgba(188, 71, 73)',
-        borderWidth: 2.4,
-        borderStyle: 'dotted',
+        borderColor: 'rgb(188, 71, 73)',
+        borderWidth: 2,
+        borderStyle: 'solid',
     }
 })

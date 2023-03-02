@@ -41,27 +41,42 @@ export namespace Global {
 
     export namespace User {
         export enum Type {
-            REGULAR_USER = 'regular-user',
-            SHIPPER = 'shipper',
-            ANONYMOUS = 'anonymous'
+            REGULAR_USER,
+            SHIPPER
         }
 
         class User {
             // type: Type = Type.ANONYMOUS
-            type: Type = Type.SHIPPER
+            private _type: Type = Type.SHIPPER
+
+            setType(type: string) {
+                type = type.trim().toLowerCase()
+
+                if (['shipper', 'driver', 'role_shipper', 'role_driver'].includes(type))
+                    this._type = Type.SHIPPER
+                else if (['user', 'regular_user', 'role_user'].includes(type))
+                    this._type = Type.REGULAR_USER
+            }
+
+            get type() {
+                return this._type
+            }
 
             isRegularUser() {
-                return this.type === Type.REGULAR_USER
+                return this._type === Type.REGULAR_USER
             }
             isShipper() {
-                return this.type === Type.SHIPPER
-            }
-            isAnonymous() {
-                return this.type === Type.ANONYMOUS
+                return this._type === Type.SHIPPER
             }
         }
 
         export const CurrentUser = new User()
+    }
+
+    export namespace DEFAULT_ENDPOINT {
+        export const ORIGIN = '10.0.2.2'
+        export const PORT = '8080'
+        export const PROTOCOL = 'http'
     }
 
     export namespace DefaultFilterChain {

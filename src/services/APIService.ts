@@ -1,5 +1,7 @@
+import { Global } from "../Global"
+
 export namespace APIService {
-    const default_origin: string = '10.0.2.2'
+    const default_origin: string = Global.DEFAULT_ENDPOINT.ORIGIN
 
     export enum Protocol {
         'HTTP' = 'http',
@@ -23,7 +25,7 @@ export namespace APIService {
             _port = (_port > 0) ? _port : (protocols.get(Protocol.HTTP) as number)
         }
 
-        return `${protocol as string}://${origin}:${port}`
+        return `${protocol as string}://${origin}:${_port}`
     }
 
     function formatSubdirectory(subdirectory: string) {

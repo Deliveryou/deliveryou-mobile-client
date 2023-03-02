@@ -9,26 +9,10 @@ import { Shadow } from 'react-native-shadow-2'
 import User from '../../../../entities/User'
 import axios from 'axios'
 import { APIService } from '../../../../services/APIService'
-//const SockJS = require('sockjs')
+import SockJs from 'react-stomp';
 
 const SCREEN_WIDTH = Dimensions.get('screen').width
 
-function test() {
-    // var sock = new SockJS(APIService.buildDefaultEndpoint('/websocket'))
-    // sock.onopen = function () {
-    //     console.log('open');
-    //     //sock.send('test');
-    // };
-
-    // sock.onmessage = (error: any) => {
-    //     console.log('message', error.data);
-    //     //sock.close();
-    // };
-
-    // sock.onclose = function () {
-    //     console.log('close');
-    // };
-}
 
 export default function OngoingDelivery({ route, navigation }) {
     const client = useRef<User>({
@@ -40,6 +24,15 @@ export default function OngoingDelivery({ route, navigation }) {
 
     return (
         <View style={[flex_1]}>
+            <SockJs
+                url={"http://10.0.2.2:8080/websocket"}
+                topics={['/topic/greetings']}
+                onConnect={() => console.log('connect')}
+                onDisconnect={() => console.log("Disconnected!")}
+                onMessage={(msg: any) => console.log('msg: ', msg)}
+                onConnectFailure={(error: any) => console.log('error: ', error)}
+                debug={false}
+            />
             <SimpleHeaderNavigation
                 navigation={navigation}
                 title='Ongoing Delivery'
@@ -52,7 +45,6 @@ export default function OngoingDelivery({ route, navigation }) {
                 <Button title={'click'}
                     onPress={() => {
                         console.log('test')
-                        test()
                     }}
                 />
                 <View style={[p_25, align_items_center]}>

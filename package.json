@@ -30,9 +30,12 @@
     "react-native-linear-gradient": "^2.6.2",
     "react-native-safe-area-context": "*",
     "react-native-screens": "*",
+    "react-native-secure-key-store": "^2.0.10",
     "react-native-shadow-2": "^7.0.6",
     "react-native-svg": "^13.6.0",
-    "react-native-vector-icons": "^9.2.0"
+    "react-native-vector-icons": "^9.2.0",
+    "react-stomp": "^5.1.0",
+    "sockjs": "^0.3.24"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",

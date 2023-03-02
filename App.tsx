@@ -8,7 +8,7 @@ import {
   Text,
   useColorScheme,
   View,
-  Alert
+  Alert, DeviceEventEmitter
 } from 'react-native';
 
 import {
@@ -30,6 +30,7 @@ import NetInfo, { useNetInfo, NetInfoState } from '@react-native-community/netin
 import AddDeliveryDetails from './src/screens/MainScreen/RegularUser/HomeTab/AddDeliveryDetails';
 import MatchingOptions from './src/screens/MainScreen/Shipper/HomeTab/MatchingOptions';
 import OngoingDelivery from './src/screens/MainScreen/Shipper/HomeTab/OngoingDelivery';
+import { AuthenticationService } from './src/services/AuthenticationService';
 
 const Stack = createNativeStackNavigator()
 
@@ -115,13 +116,26 @@ function showAlert() {
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  const [isAuthenticated, setAuthenticated] = useState(true)
+  const [isAuthenticated, setAuthenticated] = useState(false)
 
   useEffect(() => {
     NetInfo.fetch().then(state => {
       if (state.isInternetReachable === false)
         showAlert()
     })
+
+    DeviceEventEmitter.addListener('event.app.authenticationState', setAuthenticated)
+
+    AuthenticationService.loginWithSavedCredential(
+      (loginInfo) => {
+        Global.User.CurrentUser.setType(loginInfo.userType)
+        DeviceEventEmitter.emit('event.app.authenticationState', true)
+      },
+      () => {
+
+      }
+    )
+
   }, [])
 
 
@@ -142,7 +156,8 @@ const App = () => {
           (!isAuthenticated) ?
             <Stack.Screen
               name='authenticationScreen'
-              component={Authentication} />
+              component={Authentication}
+            />
             :
             <Stack.Screen
               name='mainScreen'

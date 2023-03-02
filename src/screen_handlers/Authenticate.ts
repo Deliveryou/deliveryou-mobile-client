@@ -1,15 +1,16 @@
 import Validator from "../utils/Validator"
 import { ToastAndroid } from 'react-native';
 import { delay } from "../utils/ultilities";
+import { AuthenticationService } from "../services/AuthenticationService";
 
 type void_func = () => void
 
 export interface LoginConfig {
     phone: string
     password: string
-    onLoginSuccess?: void_func
-    onLoginFail?: void_func
-    onLoginStart?: void_func
+    onLoginSuccess?: (response: AuthenticationService.LogInResponse) => void,
+    onLoginFail?: (reason: any) => void,
+    onLoginStart?: () => Promise<void>,
     onLoginEnd?: void_func
     onValidatePass?: void_func
     onValidateFail?: void_func
@@ -52,28 +53,23 @@ export class Authenticate {
     }
 
     private static async callAPI() {
-        await delay(2000)
+        await delay(1000)
         return true
     }
 
-    static login(config: LoginConfig) {
-        const { onLoginSuccess, onLoginFail, onLoginStart, onLoginEnd } = config
+    static async login(config: LoginConfig) {
+        const { phone, password, onLoginSuccess, onLoginFail, onLoginStart } = config
 
-        Authenticate.validateLogin(config).then(success => {
+        Authenticate.validateLogin(config).then(async (success) => {
             if (!success) {
-                onLoginFail?.()
+                //onLoginFail?.()
                 return
             }
 
-            onLoginStart?.()
+            await onLoginStart?.()
+            AuthenticationService.login(phone, password, onLoginSuccess, onLoginFail)
 
-            Authenticate.callAPI().then(success => {
-                onLoginEnd?.();
-                (success) ? onLoginSuccess?.() : onLoginFail?.()
-            })
-        }).catch(reason => onLoginFail?.())
-
-        ToastAndroid.show('Login successfully', 1000)
+        }).catch(reason => onLoginFail?.(reason))
     }
 
     static signup() {
