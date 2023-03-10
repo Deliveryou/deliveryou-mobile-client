@@ -178,9 +178,12 @@ export namespace LocationService {
             searchInfo.limit = (searchInfo.limit < 1) ? 1 : searchInfo.limit
 
             const endpoint = `https://api.locationiq.com/v1/autocomplete?key=${ACCESS_TOKEN}&q=${searchInfo.query}&limit=${searchInfo.limit}&dedupe=1&normalizeaddress=1&countrycodes=vn`
-
+            console.log('endpoint iq: ', endpoint)
             axios.get(endpoint)
-                .then(response => response.data as Response.Data[])
+                .then(response => {
+                    console.log('iq response: ', response.data)
+                    return response.data as Response.Data[]
+                })
                 .then(listOfData => onRequestSuccessfully(listOfData))
                 .catch(error => onRequestFailed?.(error))
         }

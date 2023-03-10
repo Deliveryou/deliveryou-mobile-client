@@ -50,6 +50,7 @@ function LogIn() {
             onLoginSuccess(response) {
                 setLoadingDialogVisible(false)
                 Global.User.CurrentUser.setType(response.userType)
+                Global.User.CurrentUser.id = response.id
 
                 AuthenticationService.securelySaveCredential(
                     response as AuthenticationService.LogInResponse,

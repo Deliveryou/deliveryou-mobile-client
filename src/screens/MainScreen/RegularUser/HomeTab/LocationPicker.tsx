@@ -26,10 +26,14 @@ const getHighlightStyle = (currentInputIndex: number, inputIndex: number) => {
     return (currentInputIndex === inputIndex) ? styles.highlightInput : emptyObject
 }
 
+let startingPointDataList: Data[] = []
+let destinationDataList: Data[] = []
+
 const onLocationTyped = throttle(
     (text: string, currentInputIndex: number, onRefreshNeeded?: () => void) => {
         getSuggestionsData(text,
             (dataList) => {
+                console.log('++++++++++++ 12320792309730: ', dataList)
                 if (currentInputIndex === PICKUP_LOC_INDEX)
                     startingPointDataList = dataList
                 else
@@ -40,8 +44,6 @@ const onLocationTyped = throttle(
     }, 1500
 )
 
-let startingPointDataList: Data[] = []
-let destinationDataList: Data[] = []
 
 export default function LocationPicker({ route, navigation },) {
     const [currentInputIndex, setCurrentInputIndex] = useState(0)
@@ -91,7 +93,7 @@ export default function LocationPicker({ route, navigation },) {
         const { lon: d_lon, lat: d_lat } = destination.current
 
         if (currentInputIndex === PICKUP_LOC_INDEX) {
-            if (data.lon === d_lon && data.lat === d_lat) {
+            if (data?.lon === d_lon && data?.lat === d_lat) {
                 destination.current = startingPoint.current
                 destinationInput.current?.setNativeProps({ text: startingPoint.current?.display_name })
             }
@@ -301,11 +303,15 @@ function getSuggestionsData(searchQuery: string,
     onGetSuccessfully: (list: Data[]) => void,
     onGetFailed?: (error: any) => void) {
 
+    console.log('get sugg')
+
     LocationService.LocationIQ.autoComplete({ query: searchQuery, limit: 10 },
         (dataList) => {
+            console.log('+++++++++++ get sugg: ', dataList)
             onGetSuccessfully(dataList)
         },
         (error) => {
+            console.log('get sugg err')
             ToastAndroid.show('Failed to load suggestion', ToastAndroid.SHORT)
             onGetFailed?.(error)
         }

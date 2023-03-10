@@ -1,5 +1,6 @@
 import NetInfo from "@react-native-community/netinfo"
 import FilterChain, { Filter } from "./services/FilterChain"
+import { ApolloClient } from '@apollo/client'
 
 export namespace Global {
     export namespace Color {
@@ -48,6 +49,7 @@ export namespace Global {
         class User {
             // type: Type = Type.ANONYMOUS
             private _type: Type = Type.SHIPPER
+            id: number
 
             setType(type: string) {
                 type = type.trim().toLowerCase()
@@ -77,6 +79,17 @@ export namespace Global {
         export const ORIGIN = '10.0.2.2'
         export const PORT = '8080'
         export const PROTOCOL = 'http'
+        let accessToken: string = ''
+        export function ACCESS_TOKEN() {
+            return accessToken;
+        }
+        export function SET_ACCESS_TOKEN(value: string) {
+            value = value.trim()
+            if (value === '')
+                throw "Invalid access token"
+
+            accessToken = value
+        }
     }
 
     export namespace DefaultFilterChain {
@@ -91,6 +104,21 @@ export namespace Global {
                     return true
                 }
             ))
+        }
+    }
+
+    export namespace GraphQL {
+        let _client: ApolloClient<any> | undefined = undefined
+
+        export function getClient() {
+            return _client
+        }
+
+        export function setClient(client: ApolloClient<any>) {
+            if (!client)
+                throw 'Null ApolloClient is not allowed'
+
+            _client = client
         }
     }
 }

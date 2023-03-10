@@ -9,7 +9,7 @@ import { Shadow } from 'react-native-shadow-2'
 import User from '../../../../entities/User'
 import axios from 'axios'
 import { APIService } from '../../../../services/APIService'
-import SockJs from 'react-stomp';
+import { Global } from '../../../../Global'
 
 const SCREEN_WIDTH = Dimensions.get('screen').width
 
@@ -24,15 +24,6 @@ export default function OngoingDelivery({ route, navigation }) {
 
     return (
         <View style={[flex_1]}>
-            <SockJs
-                url={"http://10.0.2.2:8080/websocket"}
-                topics={['/topic/greetings']}
-                onConnect={() => console.log('connect')}
-                onDisconnect={() => console.log("Disconnected!")}
-                onMessage={(msg: any) => console.log('msg: ', msg)}
-                onConnectFailure={(error: any) => console.log('error: ', error)}
-                debug={false}
-            />
             <SimpleHeaderNavigation
                 navigation={navigation}
                 title='Ongoing Delivery'

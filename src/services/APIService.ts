@@ -1,6 +1,11 @@
+import Axios from "axios"
 import { Global } from "../Global"
 
 export namespace APIService {
+    export function getAccessToken() {
+        return Global.DEFAULT_ENDPOINT.ACCESS_TOKEN()
+    }
+
     const default_origin: string = Global.DEFAULT_ENDPOINT.ORIGIN
 
     export enum Protocol {
@@ -44,6 +49,36 @@ export namespace APIService {
         const endpoint = buildOrigin(Protocol.WS, protocols.get(Protocol.HTTP)) + formatSubdirectory(subdirectory)
         console.log('ws endpoint: ', endpoint)
         return endpoint
+    }
+
+    type LooseObject = {
+        [key: string]: any
+    }
+
+
+    export function axios(subdirectory: string, method: 'get' | 'post' = 'get', headers?: LooseObject) {
+        headers = (headers) ? headers : ({} as LooseObject)
+        if (headers.Authorization === undefined)
+            headers.Authorization = `Bearer ${getAccessToken()}`
+
+        const _config = {
+            method: method,
+            maxBodyLength: Infinity,
+            url: buildDefaultEndpoint(subdirectory),
+            headers: headers
+        };
+
+        return Axios(_config)
+    }
+
+    function useDefaultPropsIfNotExist(props: Object, defaultProps: object) {
+        if (props.constructor.name !== defaultProps.constructor.name)
+            throw '[props] and [defaultProps] must instances of the same class'
+
+        for (let key in defaultProps) {
+            if (props[key] === undefined)
+                props[key] = defaultProps[key]
+        }
     }
 
 }

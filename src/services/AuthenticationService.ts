@@ -39,7 +39,8 @@ export namespace AuthenticationService {
     export type LogInResponse = {
         accessToken: string,
         tokenType: string,
-        userType: string
+        userType: string,
+        id: number
     }
 
     export function verifyToken(accessToken: string,
@@ -74,13 +75,17 @@ export namespace AuthenticationService {
     }
 
     async function createRetrivableCredential(loginResponse: LogInResponse) {
-        const credential = `${loginResponse.tokenType}##${loginResponse.accessToken}##${loginResponse.userType}`
-
-        return testCredential(credential) ? credential : undefined
+        return (testCredential(loginResponse)) ? JSON.stringify(loginResponse) : undefined
     }
 
-    function testCredential(credential: string) {
-        return (/^[a-zA-Z]+##.+##.+$/.test(credential))
+    function testCredential(loginResponse: LogInResponse) {
+        if (loginResponse.accessToken.length === 0)
+            return false
+        if (loginResponse.userType.length === 0)
+            return false
+        if (loginResponse.tokenType.length === 0)
+            return false
+        return true
     }
 
     export function securelySaveCredential(loginResponse: LogInResponse, onSaved?: () => void, onSaveFailure?: (error: any) => void) {
@@ -99,19 +104,15 @@ export namespace AuthenticationService {
             })
     }
 
-    export function retriveSavedCredential() {
+    function retriveSavedCredential() {
         return RNSecureKeyStore.get('credential')
             .then((credential: string) => {
-                if (testCredential(credential)) {
-                    const loginInfo = credential.split('##')
-                    const loginResponse: LogInResponse = {
-                        accessToken: loginInfo[1],
-                        tokenType: loginInfo[0],
-                        userType: loginInfo[2]
-                    }
+                try {
+                    const loginResponse: LogInResponse = JSON.parse(credential)
                     return loginResponse
-                } else
+                } catch (error) {
                     throw 'invalid saved credential'
+                }
             })
     }
 

@@ -31,6 +31,11 @@ import AddDeliveryDetails from './src/screens/MainScreen/RegularUser/HomeTab/Add
 import MatchingOptions from './src/screens/MainScreen/Shipper/HomeTab/MatchingOptions';
 import OngoingDelivery from './src/screens/MainScreen/Shipper/HomeTab/OngoingDelivery';
 import { AuthenticationService } from './src/services/AuthenticationService';
+import SockJs from 'react-stomp';
+import { APIService } from './src/services/APIService';
+import { UserService } from './src/services/UserService';
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
+
 
 const Stack = createNativeStackNavigator()
 
@@ -113,6 +118,22 @@ function showAlert() {
   )
 }
 // -------------------------------
+function onWebSocketConnected() {
+  console.log("connected!")
+  // UserService.registerAsActive(
+  //   (response) => {
+  //     //console.log('-------- online: true')
+  //   },
+  //   (error) => {
+  //     console.log('-------- online: error')
+  //   }
+  // )
+}
+
+function onWebSocketDisconnected() {
+  console.log("Disconnected!")
+  UserService.registerAsInactive()
+}
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
@@ -123,18 +144,27 @@ const App = () => {
       if (state.isInternetReachable === false)
         showAlert()
     })
-
+    // -----------------
     DeviceEventEmitter.addListener('event.app.authenticationState', setAuthenticated)
-
+    // -----------------
     AuthenticationService.loginWithSavedCredential(
       (loginInfo) => {
         Global.User.CurrentUser.setType(loginInfo.userType)
+        Global.User.CurrentUser.id = loginInfo.id
+        Global.DEFAULT_ENDPOINT.SET_ACCESS_TOKEN(loginInfo.accessToken)
         DeviceEventEmitter.emit('event.app.authenticationState', true)
       },
       () => {
 
       }
     )
+    // -----------------
+    const client = new ApolloClient({
+      uri: APIService.buildDefaultEndpoint('graphql'),
+      cache: new InMemoryCache()
+    });
+    Global.GraphQL.setClient(client)
+    // -----------------
 
   }, [])
 
@@ -148,23 +178,36 @@ const App = () => {
   // />
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{ headerShown: false }}
-      >
-        {
-          (!isAuthenticated) ?
-            <Stack.Screen
-              name='authenticationScreen'
-              component={Authentication}
-            />
-            :
-            <Stack.Screen
-              name='mainScreen'
-              component={MainScreen} />
-        }
-      </Stack.Navigator>
-    </NavigationContainer>
+    <>
+      <SockJs
+        url={APIService.buildDefaultEndpoint('/websocket')}
+        topics={['/topic/greetings', `/user/${Global.User.CurrentUser.id}/notification`]}
+        onConnect={onWebSocketConnected}
+        onDisconnect={onWebSocketDisconnected}
+        onMessage={(msg: any) => console.log('msg: ', msg)}
+        onConnectFailure={(error: any) => console.log('error: ', error)}
+        debug={false}
+        headers={{ names: '12332' }}
+        subscribeHeaders={{ names: '12332' }}
+      />
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{ headerShown: false }}
+        >
+          {
+            (!isAuthenticated) ?
+              <Stack.Screen
+                name='authenticationScreen'
+                component={Authentication}
+              />
+              :
+              <Stack.Screen
+                name='mainScreen'
+                component={MainScreen} />
+          }
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 };
 

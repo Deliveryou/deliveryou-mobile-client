@@ -8,9 +8,22 @@ import { Shadow } from 'react-native-shadow-2'
 import { LocationService } from '../../../../services/LocationService'
 import { ObtainKeys } from '../../../../utils/ultilities'
 import ItemType, { ItemTypeDetails } from '../../../../entities/ItemType'
+import { Global } from '../../../../Global'
+import { GraphQLService } from '../../../../services/GraphQLService'
 
 const BOX_SHADOW_COLOR = '#6c757d26'
 
+// --------------------------------------------------
+
+function getCurrentUserInfo() {
+    GraphQLService.getCurrentUserInfo(
+        Global.User.CurrentUser.id,
+        (data) => console.log('data: ', data),
+        (error) => console.log('error: ', error)
+    )
+}
+
+// --------------------------------------------------
 interface AddDeliveryDetailsProps {
     // refreshHomeLocationSelector?: () => void
 }
@@ -25,7 +38,7 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
     const pickupTypePrices = useRef<number[]>([50000, 30000])
     const currentItemTypeDetails = useRef(ItemType.Food)
     const senderInfo = useRef<PersonInfo>({
-        name: 'John Doe',
+        name: 'John Doel',
         phone: '0123456789',
         address: '123 Address'
     }).current
@@ -61,6 +74,7 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                     </Text>
                 </View>
             </View>
+            <Button title={"button"} onPress={getCurrentUserInfo} />
 
             <TabView disableSwipe={true} value={tabIndex} onChange={setTabIndex} animationType="spring">
                 <TabView.Item style={{ width: '100%' }}>
