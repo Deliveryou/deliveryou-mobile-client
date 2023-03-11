@@ -1,8 +1,13 @@
 import { Global } from "../Global";
 import { ApolloClient, gql, QueryOptions, OperationVariables } from '@apollo/client'
+import User from "../entities/User";
 
 export namespace GraphQLService {
     export namespace Schema {
+        export enum Query {
+            userById = 'userById'
+        }
+
         export enum User {
             id = 'id',
             firstName = 'firstName',
@@ -55,7 +60,7 @@ export namespace GraphQLService {
     function userById(id: number, fieldsToFetch: Schema.User[]) {
         return getGlobalClient().query(buildQuery(
             {
-                queryName: 'userById',
+                queryName: Schema.Query.userById,
                 params: [{ paramName: 'id', paramValue: id }]
             },
             fieldsToFetch
@@ -64,10 +69,10 @@ export namespace GraphQLService {
     }
 
     // ------ PUBLIC MEMBERS
-    export function getCurrentUserInfo(id: number, onGetSuccess?: (data: any) => void, onGetFailure?: (error: any) => void) {
+    export function getCurrentUserInfo(id: number, onGetSuccess?: (data: User) => void, onGetFailure?: (error: any) => void) {
         const u = Schema.User
         userById(id, [u.id, u.firstName, u.lastName, u.phone])
-            .then(result => onGetSuccess?.(result.data))
+            .then(result => onGetSuccess?.(result.data[Schema.Query.userById]))
             .catch(error => onGetFailure?.(error))
     }
 

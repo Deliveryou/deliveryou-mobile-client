@@ -1,7 +1,7 @@
 export default class User {
     id: number = 0
-    firstname: string = ''
-    lastname: string = ''
+    firstName: string = ''
+    lastName: string = ''
     dob?: Date = new Date()
     citizenId?: string = ''
     phone: string = ''

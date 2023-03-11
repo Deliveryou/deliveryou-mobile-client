@@ -1,7 +1,7 @@
 import { Avatar, BottomSheet, Button, CheckBox, Icon, ListItem, TabView, Text } from '@rneui/themed'
-import { View, DeviceEventEmitter, BackHandler, TextInput, TextInputProps, Dimensions, StyleSheet, StatusBar, Animated, TouchableNativeFeedback, TouchableOpacity, Pressable } from 'react-native'
+import { View, DeviceEventEmitter, BackHandler, Image, TextInput, TextInputProps, Dimensions, StyleSheet, StatusBar, Animated, TouchableNativeFeedback, TouchableOpacity, Pressable, ToastAndroid } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import { align_items_center, align_self_center, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_0, border_radius_1, border_radius_4, border_radius_pill, flex_1, flex_column, flex_row, fs_large, fs_normal, fs_semi_large, fw_500, fw_600, fw_bold, h_100, justify_center, mb_10, mb_20, mb_25, ml_10, mr_10, mt_0, mt_10, mt_20, mt_5, mx_10, my_10, my_20, m_10, m_15, m_20, overflow_hidden, pb_10, pl_20, position_absolute, pt_15, pt_20, pt_25, px_10, px_15, px_20, py_10, py_15, py_20, p_10, p_20, Style, text_white, w_100, w_75 } from '../../../../stylesheets/primary-styles'
+import { align_items_center, align_self_center, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_0, border_radius_1, border_radius_4, border_radius_pill, flex_1, flex_column, flex_row, fs_large, fs_normal, fs_semi_large, fw_500, fw_600, fw_bold, h_100, justify_center, mb_10, mb_20, mb_25, mb_5, ml_10, mr_10, mr_5, mt_0, mt_10, mt_20, mt_25, mt_5, mx_10, my_10, my_20, m_10, m_15, m_20, overflow_hidden, pb_10, pb_25, pl_10, pl_20, position_absolute, pt_15, pt_20, pt_25, px_10, px_15, px_20, py_10, py_15, py_20, p_10, p_20, Style, text_white, w_100, w_75 } from '../../../../stylesheets/primary-styles'
 import { LocationSelector } from './HomeTab'
 import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react'
 import { Shadow } from 'react-native-shadow-2'
@@ -10,18 +10,13 @@ import { ObtainKeys } from '../../../../utils/ultilities'
 import ItemType, { ItemTypeDetails } from '../../../../entities/ItemType'
 import { Global } from '../../../../Global'
 import { GraphQLService } from '../../../../services/GraphQLService'
+import User from '../../../../entities/User'
+import { CameraService } from '../../../../services/CameraService'
+import { Camera, useCameraDevices } from 'react-native-vision-camera'
+import { CameraDevice } from 'react-native-vision-camera/lib/typescript/CameraDevice'
+import Validator from '../../../../utils/Validator'
 
 const BOX_SHADOW_COLOR = '#6c757d26'
-
-// --------------------------------------------------
-
-function getCurrentUserInfo() {
-    GraphQLService.getCurrentUserInfo(
-        Global.User.CurrentUser.id,
-        (data) => console.log('data: ', data),
-        (error) => console.log('error: ', error)
-    )
-}
 
 // --------------------------------------------------
 interface AddDeliveryDetailsProps {
@@ -37,11 +32,67 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
     const distance = useRef(5)
     const pickupTypePrices = useRef<number[]>([50000, 30000])
     const currentItemTypeDetails = useRef(ItemType.Food)
-    const senderInfo = useRef<PersonInfo>({
-        name: 'John Doel',
-        phone: '0123456789',
-        address: '123 Address'
-    }).current
+    const senderInfo = useRef({} as PersonInfo)
+    const recipientInfo = useRef({ name: '', phone: '', address: '' } as PersonInfo)
+    const note = useRef<string>('')
+    const [_refresh, setRefresh] = useState(0)
+    const photoUri = useRef<string | undefined>(undefined)
+
+    const refresh = () => setRefresh(value => value + 1)
+
+    useEffect(() => {
+        DeviceEventEmitter.addListener(
+            'event.AddDeliveryDetails.onPhotoChosen',
+            (uri: string) => {
+                photoUri.current = uri
+                refresh()
+            }
+        )
+
+    }, [])
+
+
+    function setSenderInfo(user: User) {
+        senderInfo.current = {
+            name: user.firstName + ' ' + user.lastName,
+            phone: user.phone,
+            address: ''
+        }
+        reloadAddresses()
+    }
+
+    function reloadAddresses() {
+        const s_addr = (route.params.startingPointRef.current as LocationService.LocationIQ.Response.Data).display_name
+        senderInfo.current.address = s_addr
+        const r_addr = (route.params.destinationRef.current as LocationService.LocationIQ.Response.Data).display_name
+        recipientInfo.current.address = r_addr
+        refresh()
+    }
+
+    function findDriver() {
+        validatePersonInfo(senderInfo.current, 'Sender')
+            .then(() => {
+                validatePersonInfo(recipientInfo.current, 'Recipient')
+                    .then(() => {
+                        if (photoUri.current) {
+                            // main
+                            console.log('--- post: ', {
+                                senderInfo,
+                                recipientInfo,
+                                note,
+                                itemType: currentItemTypeDetails.current.name
+                            })
+                        } else
+                            ToastAndroid.show('Product photo is required', ToastAndroid.LONG)
+                    })
+            })
+            .catch(error => ToastAndroid.show('Error occured while validating your info', ToastAndroid.SHORT))
+    }
+
+    function removePhoto() {
+        photoUri.current = undefined
+        refresh()
+    }
 
     useEffect(() => {
         locationSelectorRef.current?.refresh?.()
@@ -50,6 +101,13 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
             return true
         })
         StatusBar.setBarStyle('light-content')
+        // -------------------
+        GraphQLService.getCurrentUserInfo(
+            Global.User.CurrentUser.id,
+            setSenderInfo,
+            (error) => ToastAndroid.show('Error occured while getting sender info!\nTry again!', ToastAndroid.SHORT)
+        )
+
     }, [])
     // 
     function goBack() {
@@ -74,7 +132,6 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                     </Text>
                 </View>
             </View>
-            <Button title={"button"} onPress={getCurrentUserInfo} />
 
             <TabView disableSwipe={true} value={tabIndex} onChange={setTabIndex} animationType="spring">
                 <TabView.Item style={{ width: '100%' }}>
@@ -88,7 +145,13 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                 </TabView.Item>
                 <TabView.Item style={{ width: '100%' }}>
                     <Tab2
-                        senderInfo={senderInfo}
+                        removePhoto={removePhoto}
+                        photoUri={photoUri}
+                        navigation={navigation}
+                        route={route}
+                        note={note}
+                        senderInfo={senderInfo.current}
+                        recipientInfo={recipientInfo.current}
                         currentItemTypeDetails={currentItemTypeDetails}
                     />
                 </TabView.Item>
@@ -100,6 +163,7 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                         <Button color={'#028090'} containerStyle={flex_1} buttonStyle={[border_radius_0, Style.height(40)]} title='NEXT'
                             onPress={() => {
                                 setTabIndex(current => current + 1)
+                                reloadAddresses()
                             }}
                         />
                         : null
@@ -113,9 +177,7 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                                 }}
                             />
                             <Button color={'#8338ec'} containerStyle={flex_1} buttonStyle={[border_radius_0, Style.height(40)]} title='FIND DRIVER'
-                                onPress={() => {
-
-                                }}
+                                onPress={findDriver}
                             />
                         </>
                         : null
@@ -124,6 +186,29 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
             </View>
         </View >
     )
+}
+
+// --------------------------------------------
+async function validatePersonInfo(personInfo: PersonInfo, personRole: 'Sender' | 'Recipient') {
+    personInfo.name = personInfo.name.trim().replace(/\s+/, ' ')
+    personInfo.address = personInfo.address.trim().replace(/\s+/, ' ')
+    personInfo.phone = personInfo.phone.trim()
+
+    if (personInfo.name === '') {
+        ToastAndroid.show(`${personRole}'s name is invalid`, ToastAndroid.LONG)
+        return false
+    }
+
+    if (personInfo.address.length < 25) {
+        ToastAndroid.show(`${personRole}'s address is invalid`, ToastAndroid.LONG)
+        return false
+    }
+
+    if (!Validator.TYPE.PHONE.VN.test(personInfo.phone)) {
+        ToastAndroid.show(`${personRole}'s phone number is invalid`, ToastAndroid.LONG)
+        return false
+    }
+    return true
 }
 
 // --------------------------------------------
@@ -324,7 +409,13 @@ function DeliveryTypeSelector(props: DeliveryTypeSelectorProps) {
 // --------------------------------------------
 interface Tab2Props {
     senderInfo: PersonInfo,
-    currentItemTypeDetails: React.MutableRefObject<ItemTypeDetails>
+    recipientInfo: PersonInfo,
+    currentItemTypeDetails: React.MutableRefObject<ItemTypeDetails>,
+    note: React.MutableRefObject<string>,
+    navigation: object,
+    route: object,
+    photoUri: React.MutableRefObject<string | undefined>,
+    removePhoto?: () => void
 }
 
 interface PersonInfo {
@@ -336,66 +427,115 @@ interface PersonInfo {
 function Tab2(props: Tab2Props) {
     const [senderExpanded, setSenderExpanded] = useState(false);
     const [recipientExpanded, setRecipientExpanded] = useState(true);
-    const senderInfo = props.senderInfo
+    const { senderInfo, recipientInfo, note } = props
+    const photoUri = props.photoUri.current
     const [_refresh, setRefresh] = useState(0)
     const currentItemTypeDetails = props.currentItemTypeDetails
+    // camera
 
 
     const refresh = () => setRefresh(value => value + 1)
 
+    async function launchCamera() {
+        CameraService.requestPermission(
+            async () => {
+                props.navigation.navigate('CameraScreen')
+            },
+            async () => ToastAndroid.show('Requires camera permission to take photos', ToastAndroid.LONG)
+        )
+    }
+
     return (
         <>
-            <ListItem.Accordion
-                content={
-                    <ListItem.Content>
-                        <View style={[flex_row, align_items_center]}>
-                            <Icon name='vinyl' type='entypo' color={'#0081a7'} />
-                            <Text style={[styles.tab2_title, ml_10]}>Sender</Text>
-                        </View>
-                        {
-                            (!senderExpanded) ?
-                                <View style={mt_10}>
-                                    <Text style={styles.tab2_subtitle}>{senderInfo.name}</Text>
-                                    <Text style={styles.tab2_subtitle}>{senderInfo.phone}</Text>
-                                    <Text style={styles.tab2_subtitle}>{senderInfo.address}</Text>
-                                </View> : null
-                        }
-                    </ListItem.Content>
-                }
-                isExpanded={senderExpanded}
-                onPress={() => {
-                    setSenderExpanded(!senderExpanded);
-                    //refresh()
-                }}
-            >
-                <SenderInfo
-                    senderInfo={senderInfo}
-                //onInfoChanged={(info) => refresh()}
-                />
-            </ListItem.Accordion>
+            <ScrollView style={flex_1} contentContainerStyle={{ paddingBottom: 60 }}>
+                <ListItem.Accordion
+                    content={
+                        <ListItem.Content>
+                            <View style={[flex_row, align_items_center]}>
+                                <Icon name='vinyl' type='entypo' color={'#0081a7'} />
+                                <Text style={[styles.tab2_title, ml_10]}>Sender</Text>
+                            </View>
+                            {
+                                (!senderExpanded) ?
+                                    <View style={mt_10}>
+                                        <Text style={[styles.tab2_subtitle, mb_5]}>{senderInfo.name}</Text>
+                                        <Text style={[styles.tab2_subtitle, mb_5]}>{senderInfo.phone}</Text>
+                                        <Text style={styles.tab2_subtitle}>{senderInfo.address}</Text>
+                                    </View> : null
+                            }
+                        </ListItem.Content>
+                    }
+                    isExpanded={senderExpanded}
+                    onPress={() => {
+                        setSenderExpanded(!senderExpanded);
+                        //refresh()
+                    }}
+                >
+                    <SenderInfo
+                        senderInfo={senderInfo}
+                    //onInfoChanged={(info) => refresh()}
+                    />
+                </ListItem.Accordion>
 
-            <ListItem.Accordion
-                content={
-                    <ListItem.Content>
-                        <View style={[flex_row, align_items_center]}>
-                            <Icon name='location-pin' type='entypo' color={'#ff686b'} size={30} />
-                            <Text style={[styles.tab2_title, { marginLeft: 4 }]}>Recipient</Text>
-                        </View>
-                    </ListItem.Content>
-                }
-                isExpanded={recipientExpanded}
-                onPress={() => {
-                    setRecipientExpanded(!recipientExpanded);
-                }}
-            >
-                <Recipient
-                    currentItemTypeDetails={currentItemTypeDetails}
-                />
-            </ListItem.Accordion>
+                <ListItem.Accordion
+                    content={
+                        <ListItem.Content>
+                            <View style={[flex_row, align_items_center]}>
+                                <Icon name='location-pin' type='entypo' color={'#ff686b'} size={30} />
+                                <Text style={[styles.tab2_title, { marginLeft: 4 }]}>Recipient</Text>
+                            </View>
+                        </ListItem.Content>
+                    }
+                    isExpanded={recipientExpanded}
+                    onPress={() => {
+                        setRecipientExpanded(!recipientExpanded);
+                    }}
+                >
+                    <Recipient
+                        note={note}
+                        recipientInfo={recipientInfo}
+                        currentItemTypeDetails={currentItemTypeDetails}
+                    />
+                </ListItem.Accordion>
 
+                <View style={[m_15, mt_25]}>
+                    <View style={[flex_row, align_items_center]}>
+                        <Icon name='photo' type='material-icon' color={'#02c39a'} size={25} />
+                        <Text style={[styles.tab2_title, { marginLeft: 12 }]}>Product photo</Text>
+                    </View>
+                    <View style={[flex_row, pl_10]}>
+                        <Text style={[Style.textColor("#a4133c"), fs_semi_large, fw_bold, mr_5]}>*</Text>
+                        <Text style={Style.textColor('#6c757d')}>Required to verify your products</Text>
+                    </View>
+                    {
+                        (!photoUri) ?
+                            <TouchableNativeFeedback onPress={launchCamera}>
+                                <View style={[Style.backgroundColor('#dee2e6'), w_100, mt_10, px_10, py_15, Style.borderRadius(10)]}>
+                                    <Icon name='photo-camera' type='material-icon' color={'#3c096c'} />
+                                </View>
+                            </TouchableNativeFeedback>
+                            :
+                            <View>
+                                <Button
+                                    containerStyle={[mt_10, Style.borderRadius(10)]}
+                                    title={'Remove This Photo'}
+                                    onPress={props.removePhoto}
+                                />
+                                <Image
+                                    source={{ uri: photoUri }}
+                                    style={[w_100, Style.borderRadius(10), mt_10, { aspectRatio: Dimensions.get('screen').width / Dimensions.get('screen').height }]}
+
+                                />
+                            </View>
+                    }
+                </View>
+
+            </ScrollView>
         </>
     )
 }
+
+// --------------------------------------------
 
 // --------------------------------------------
 interface SenderInfoProps {
@@ -454,12 +594,16 @@ function SenderInfo(props: SenderInfoProps) {
 // --------------------------------------------
 interface RecipientProps {
     onItemTypePressed?: (itemTypeDetails: ItemTypeDetails) => void,
-    currentItemTypeDetails: React.MutableRefObject<ItemTypeDetails>
+    currentItemTypeDetails: React.MutableRefObject<ItemTypeDetails>,
+    recipientInfo: PersonInfo,
+    note: React.MutableRefObject<string>
 }
 
 function Recipient(props: RecipientProps) {
     const [btmSheetExpanded, setBtmSheetExpanded] = useState(false)
     const currentItemTypeDetails = props.currentItemTypeDetails
+    const recipientInfo = props.recipientInfo
+    const note = props.note
     const [_refresh, setRefresh] = useState(0)
 
     const refresh = () => setRefresh(value => value + 1)
@@ -472,6 +616,7 @@ function Recipient(props: RecipientProps) {
                     style={styles.textInput}
                     placeholder='Full name'
                     textContentType='fullStreetAddress'
+                    onChangeText={(text) => recipientInfo.name = text}
                 />
             </View>
             <View style={flex_row}>
@@ -479,14 +624,16 @@ function Recipient(props: RecipientProps) {
                     //ref={senderRef_address}
                     style={styles.textInput}
                     placeholder='Phone number'
+                    keyboardType='number-pad'
                     textContentType='fullStreetAddress'
+                    onChangeText={(text) => recipientInfo.phone = text}
                 />
             </View>
             <View style={flex_row}>
                 <TextInput
                     //ref={senderRef_address}
                     style={styles.textInput}
-                    defaultValue={'123 address'}
+                    defaultValue={recipientInfo.address}
                     placeholder='Address'
                     textContentType='fullStreetAddress'
                 />
@@ -497,6 +644,7 @@ function Recipient(props: RecipientProps) {
                     style={{ marginLeft: 5, fontSize: 15, flex: 1, paddingHorizontal: 15, backgroundColor: '#dee2e6', borderRadius: 10 }}
                     multiline
                     placeholder='Add a note to driver'
+                    onChangeText={(text) => note.current = text}
                 />
             </View>
             <View style={[flex_row, mt_10]}>

@@ -29,6 +29,7 @@
     "react-native": "^0.70.6",
     "react-native-geolocation-service": "^5.3.1",
     "react-native-gesture-handler": "*",
+    "react-native-image-picker": "^5.1.0",
     "react-native-linear-gradient": "^2.6.2",
     "react-native-safe-area-context": "*",
     "react-native-screens": "*",
@@ -36,6 +37,7 @@
     "react-native-shadow-2": "^7.0.6",
     "react-native-svg": "^13.6.0",
     "react-native-vector-icons": "^9.2.0",
+    "react-native-vision-camera": "^2.15.4",
     "react-stomp": "^5.1.0",
     "sockjs": "^0.3.24"
   },
