@@ -965,7 +965,7 @@ export namespace Style {
         return { borderRadius: value }
     }
 
-    export function backgroundColor(value: string) {
+    export function backgroundColor(value: string | ColorValue) {
         return { backgroundColor: value }
     }
 

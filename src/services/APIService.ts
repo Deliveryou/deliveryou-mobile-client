@@ -56,7 +56,7 @@ export namespace APIService {
     }
 
 
-    export function axios(subdirectory: string, method: 'get' | 'post' = 'get', headers?: LooseObject) {
+    export function axios(subdirectory: string, method: 'get' | 'post' = 'get', body?: object, headers?: LooseObject) {
         headers = (headers) ? headers : ({} as LooseObject)
         if (headers.Authorization === undefined)
             headers.Authorization = `Bearer ${getAccessToken()}`
@@ -65,8 +65,11 @@ export namespace APIService {
             method: method,
             maxBodyLength: Infinity,
             url: buildDefaultEndpoint(subdirectory),
-            headers: headers
-        };
+            headers: headers,
+        } as LooseObject;
+
+        if (body)
+            _config.data = body
 
         return Axios(_config)
     }

@@ -1,7 +1,7 @@
 import { StatusBar, StyleSheet, View, ColorValue, StatusBarStyle, BackHandler } from 'react-native'
 import React, { useEffect } from 'react'
 import { Icon, Text } from '@rneui/themed'
-import { fs_large, fw_bold, text_white, w_100 } from '../stylesheets/primary-styles'
+import { fs_large, fw_bold, Style, text_white, w_100 } from '../stylesheets/primary-styles'
 
 interface StatusBarValues {
   backgroundColor: ColorValue,
@@ -12,7 +12,8 @@ interface SimpleHeaderNavigationProps {
   title: string,
   navigation: object,
   parentStatusBarValues?: StatusBarValues,
-  newStatusBarValues?: StatusBarValues
+  newStatusBarValues?: StatusBarValues,
+  titleBarColor?: ColorValue
 }
 
 export default function SimpleHeaderNavigation(props: SimpleHeaderNavigationProps) {
@@ -46,8 +47,10 @@ export default function SimpleHeaderNavigation(props: SimpleHeaderNavigationProp
     return true
   }
 
+  const titleBarColor = (props.titleBarColor) ? Style.backgroundColor(props.titleBarColor) : {}
+
   return (
-    <View style={styles.rootHeader}>
+    <View style={[styles.rootHeader, titleBarColor]}>
       <Icon onPress={goBack} containerStyle={styles.rootHeaderIcon} name='chevron-back' type='ionicon' color={'white'} />
       <View style={styles.rootHeaderText}>
         <Text style={[fs_large, fw_bold, text_white]}>{props.title}</Text>

@@ -166,10 +166,14 @@ export namespace LocationService {
 
         export function reverseGeocoding(coordinates: Coordinates, onRequestSuccessfully: (responseData: Response.Data) => void, onRequestFailed?: (error: any) => void) {
             const endpoint = `https://us1.locationiq.com/v1/reverse?key=${ACCESS_TOKEN}&lat=${coordinates.latitude}&lon=${coordinates.longitude}&format=json&normalizeaddress=1`
-
-            axios.get(endpoint)
-                .then(response => response.data as Response.Data)
-                .then(data => onRequestSuccessfully(data))
+            console.log('------- reverse coding: ', endpoint)
+            fetch(endpoint)
+                .then(response => {
+                    if (response.status !== 200)
+                        throw `Unexpected status: ${response.status}`
+                    return response.json()
+                })
+                .then((data: Response.Data) => onRequestSuccessfully(data))
                 .catch(error => onRequestFailed?.(error))
         }
 

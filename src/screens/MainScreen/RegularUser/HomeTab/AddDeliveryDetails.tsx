@@ -1,7 +1,7 @@
-import { Avatar, BottomSheet, Button, CheckBox, Icon, ListItem, TabView, Text } from '@rneui/themed'
-import { View, DeviceEventEmitter, BackHandler, Image, TextInput, TextInputProps, Dimensions, StyleSheet, StatusBar, Animated, TouchableNativeFeedback, TouchableOpacity, Pressable, ToastAndroid } from 'react-native'
+import { Avatar, BottomSheet, Button, CheckBox, Dialog, Icon, ListItem, TabView, Text } from '@rneui/themed'
+import { View, DeviceEventEmitter, BackHandler, Image, TextInput, TextInputProps, Dimensions, StyleSheet, StatusBar, Animated, TouchableNativeFeedback, TouchableOpacity, Pressable, ToastAndroid, Alert } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import { align_items_center, align_self_center, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_0, border_radius_1, border_radius_4, border_radius_pill, flex_1, flex_column, flex_row, fs_large, fs_normal, fs_semi_large, fw_500, fw_600, fw_bold, h_100, justify_center, mb_10, mb_20, mb_25, mb_5, ml_10, mr_10, mr_5, mt_0, mt_10, mt_20, mt_25, mt_5, mx_10, my_10, my_20, m_10, m_15, m_20, overflow_hidden, pb_10, pb_25, pl_10, pl_20, position_absolute, pt_15, pt_20, pt_25, px_10, px_15, px_20, py_10, py_15, py_20, p_10, p_20, Style, text_white, w_100, w_75 } from '../../../../stylesheets/primary-styles'
+import { align_items_center, align_self_center, align_self_flex_start, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_0, border_radius_1, border_radius_4, border_radius_pill, clr_primary, flex_1, flex_column, flex_row, fs_large, fs_normal, fs_semi_large, fw_500, fw_600, fw_bold, h_100, justify_center, mb_10, mb_20, mb_25, mb_5, ml_10, mr_10, mr_5, mt_0, mt_10, mt_20, mt_25, mt_5, mx_10, my_10, my_20, m_10, m_15, m_20, overflow_hidden, pb_10, pb_25, pl_10, pl_20, position_absolute, position_center, pt_15, pt_20, pt_25, px_10, px_15, px_20, py_10, py_15, py_20, p_10, p_20, Style, text_white, w_100, w_75 } from '../../../../stylesheets/primary-styles'
 import { LocationSelector } from './HomeTab'
 import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react'
 import { Shadow } from 'react-native-shadow-2'
@@ -15,6 +15,8 @@ import { CameraService } from '../../../../services/CameraService'
 import { Camera, useCameraDevices } from 'react-native-vision-camera'
 import { CameraDevice } from 'react-native-vision-camera/lib/typescript/CameraDevice'
 import Validator from '../../../../utils/Validator'
+import { ImageUploadService } from '../../../../services/ImageUploadService'
+import { DeliveryService } from '../../../../services/DeliveryService'
 
 const BOX_SHADOW_COLOR = '#6c757d26'
 
@@ -23,6 +25,7 @@ interface AddDeliveryDetailsProps {
     // refreshHomeLocationSelector?: () => void
 }
 
+type Promotion = GraphQLService.Type.Promotion
 const PICKUP_TYPES = ['Pick up right now', 'Pick up within 6 hours']
 
 export default function AddDeliveryDetails({ route, navigation }, props: AddDeliveryDetailsProps) {
@@ -37,6 +40,10 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
     const note = useRef<string>('')
     const [_refresh, setRefresh] = useState(0)
     const photoUri = useRef<string | undefined>(undefined)
+    const promotion = useRef<Promotion>()
+    const price = useRef<DeliveryService.User.AdvisorResponse>({ distance: 0, price: 0 })
+    const [loadingDialogVisible, setLoadingDialogVisible] = useState(true)
+    const loadingDialogContent = useRef('')
 
     const refresh = () => setRefresh(value => value + 1)
 
@@ -75,6 +82,19 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                 validatePersonInfo(recipientInfo.current, 'Recipient')
                     .then(() => {
                         if (photoUri.current) {
+                            //console.log('---------- uri: ', photoUri.current)
+                            ImageUploadService.upload(photoUri.current, {
+                                onUploadBegan: () => {
+                                    loadingDialogContent.current = 'Uploading your photo'
+                                    setLoadingDialogVisible(true)
+                                },
+                                onUploaded: (url) => {
+                                    console.log('------- upload url: ', url)
+                                    setLoadingDialogVisible(false)
+                                    loadingDialogContent.current = ''
+                                },
+                                onUploadFailure: () => ToastAndroid.show('Failed to upload your photo', ToastAndroid.LONG)
+                            })
                             // main
                             console.log('--- post: ', {
                                 senderInfo,
@@ -94,6 +114,8 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
         refresh()
     }
 
+
+
     useEffect(() => {
         locationSelectorRef.current?.refresh?.()
         BackHandler.addEventListener('hardwareBackPress', () => {
@@ -107,7 +129,27 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
             setSenderInfo,
             (error) => ToastAndroid.show('Error occured while getting sender info!\nTry again!', ToastAndroid.SHORT)
         )
-
+        // -------------------
+        type Data = LocationService.LocationIQ.Response.Data
+        const sp: LocationService.Coordinates = {
+            latitude: Number((route.params.startingPointRef.current as Data).lat),
+            longitude: Number((route.params.startingPointRef.current as Data).lon)
+        }
+        const d: LocationService.Coordinates = {
+            latitude: Number((route.params.destinationRef.current as Data).lat),
+            longitude: Number((route.params.destinationRef.current as Data).lon)
+        }
+        DeliveryService.User.advisorPrice(sp, d,
+            (data => {
+                price.current = data
+                refresh()
+            }),
+            (error) => {
+                Alert.alert('Crtitical error', "Cannot load your delivery price", [
+                    { text: 'OK', onPress: () => navigation.goBack() }
+                ])
+            }
+        )
     }, [])
     // 
     function goBack() {
@@ -141,6 +183,8 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                         route={route}
                         distance={distance}
                         prices={pickupTypePrices}
+                        promotion={promotion}
+                        deliveryPrice={price}
                     />
                 </TabView.Item>
                 <TabView.Item style={{ width: '100%' }}>
@@ -184,6 +228,11 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                 }
 
             </View>
+
+            <Dialog overlayStyle={styles.loadingDialog} isVisible={loadingDialogVisible} onBackdropPress={() => setLoadingDialogVisible(false)}>
+                <Dialog.Loading />
+                <Text style={Style.textColor('#6c757d')}>{loadingDialogContent.current}</Text>
+            </Dialog>
         </View >
     )
 }
@@ -215,10 +264,42 @@ async function validatePersonInfo(personInfo: PersonInfo, personRole: 'Sender' |
 type Tab1Props = DeliveryTypeSelectorProps & {
     locationSelectorRef: any,
     navigation: any,
-    route: any
+    route: any,
+    promotion: React.MutableRefObject<GraphQLService.Type.Promotion | undefined>,
+    deliveryPrice: React.MutableRefObject<DeliveryService.User.AdvisorResponse>
 }
 
 function Tab1(props: Tab1Props) {
+    const [_refresh, setRefresh] = useState(0)
+
+    const refresh = () => setRefresh(value => value + 1)
+
+    function openOfferScreen() {
+        props.navigation.navigate('OfferScreen', {
+            parentStatusBarColor: 'transparent',
+            parentStatusBarStyle: 'light-content'
+        })
+    }
+
+    function removePromo() {
+        props.promotion.current = undefined
+        refresh()
+    }
+
+    useEffect(() => {
+        DeviceEventEmitter.addListener('event.AddDeliveryDetails.Tab1.onPromotionUsed',
+            (promotion: Promotion) => {
+                props.promotion.current = promotion
+                refresh()
+            })
+    }, [])
+
+    const deliveryPrice = Math.floor(props.deliveryPrice.current.price)
+    const discount: number = (props.promotion.current) ? props.promotion.current.discountPercentage : 0
+    let promoPrice = Math.floor(discount * deliveryPrice)
+    const maxDiscount: number = (props.promotion.current) ? props.promotion.current.maximumDiscountAmount : Number.MAX_VALUE
+    promoPrice = (promoPrice > maxDiscount) ? maxDiscount : promoPrice
+
     return (
         <ScrollView
             style={[styles.rootScrollView, px_15]}
@@ -235,29 +316,92 @@ function Tab1(props: Tab1Props) {
                     route={props.route}
                     startingPoint={props.route.params.startingPointRef}
                     destination={props.route.params.destinationRef}
+                    disablePressable={true}
                 />
             </Shadow>
 
-            <DeliveryTypeSelector
+            {/* <DeliveryTypeSelector
                 distance={props.distance}
                 prices={props.prices}
                 navigation={props.navigation}
                 route={props.route}
-            />
+            /> */}
 
             <Text style={[styles.boldText, mb_10, mt_20]}>Apply Offers</Text>
 
+            {
+                (props.promotion.current === undefined) ?
+                    <Shadow containerStyle={[align_self_center, mb_20]} distance={10} startColor={BOX_SHADOW_COLOR}>
+                        <TouchableOpacity activeOpacity={0.6} style={{ borderRadius: 10 }} onPress={openOfferScreen}>
+                            <ListItem containerStyle={[bg_transparent, styles._90ScreenWidth]}>
+                                <Icon style={[Style.backgroundColor('#e0afa0'), border_radius_pill, Style.padding(2)]} name="tags" type="antdesign" color="#bb3e03" />
+                                <ListItem.Content style={{ flexGrow: 1 }}>
+                                    <ListItem.Title>Use offers to get discounts</ListItem.Title>
+                                </ListItem.Content>
+                                <ListItem.Chevron color='#463f3a' size={22} />
+                            </ListItem>
+                        </TouchableOpacity>
+                    </Shadow>
+                    :
+                    <Shadow containerStyle={[align_self_center, mb_20]} distance={10} startColor={BOX_SHADOW_COLOR}>
+                        <TouchableOpacity activeOpacity={0.6} style={{ borderRadius: 10 }}>
+                            <ListItem containerStyle={[bg_transparent, styles._90ScreenWidth]}>
+                                <Icon style={[border_radius_pill, Style.padding(2)]} name="ticket-percent" type="material-community" color="#43aa8b" />
+                                <ListItem.Content style={{ flexGrow: 1 }}>
+                                    <ListItem.Title style={fw_bold}>{props.promotion.current?.promoCode}</ListItem.Title>
+                                </ListItem.Content>
+                                <TouchableNativeFeedback onPress={removePromo}>
+                                    <View style={bg_white}>
+                                        <Icon style={m_10} name='delete' type='material-icon' color={'#bc4b51'} />
+                                    </View>
+                                </TouchableNativeFeedback>
+                            </ListItem>
+                        </TouchableOpacity>
+                    </Shadow>
+
+            }
+
+            <Text style={[styles.boldText, mb_10, mt_20]}>Delivery Price</Text>
+
             <Shadow containerStyle={[align_self_center, mb_20]} distance={10} startColor={BOX_SHADOW_COLOR}>
-                <TouchableOpacity activeOpacity={0.6} style={{ borderRadius: 10 }}>
-                    <ListItem containerStyle={[bg_transparent, styles._90ScreenWidth]}>
-                        <Icon style={[Style.backgroundColor('#e0afa0'), border_radius_pill, Style.padding(2)]} name="tags" type="antdesign" color="#bb3e03" />
-                        <ListItem.Content>
-                            <ListItem.Title>Use offers to get discounts</ListItem.Title>
-                        </ListItem.Content>
-                        <ListItem.Chevron color='#463f3a' size={22} />
-                    </ListItem>
-                </TouchableOpacity>
+                <View style={[styles._90ScreenWidth, p_20, Style.borderRadius(10)]}>
+                    <View style={[flex_row, Style.borderRadius(10)]}>
+                        <Text style={{ flexGrow: 1 }}>Distance:</Text>
+                        <View style={flex_row}>
+                            <Text style={[fw_bold, Style.textColor('#393d3f')]}>{(props.deliveryPrice.current.distance / 1000).toFixed(1)}</Text>
+                            <Text> KM</Text>
+                        </View>
+                    </View>
+                    <View style={[flex_row, Style.borderRadius(10), mt_5]}>
+                        <Text style={{ flexGrow: 1 }}>Delivery price:</Text>
+                        <View style={flex_row}>
+                            <Text style={[fw_bold, Style.textColor('#393d3f')]}>{deliveryPrice}</Text>
+                            <Text> VND</Text>
+                        </View>
+                    </View>
+                    {
+                        (props.promotion.current) ?
+                            <View style={[flex_row, Style.borderRadius(10), mt_5]}>
+                                <Text style={{ flexGrow: 1 }}>Promotion:</Text>
+                                <View style={flex_row}>
+                                    <Text style={[fw_bold, Style.textColor('#40916c')]}>-{promoPrice}</Text>
+                                    <Text> VND</Text>
+                                </View>
+                            </View>
+                            : null
+                    }
+                    <View style={[w_100, Style.height(1), Style.backgroundColor('#bfc0c0'), mt_10]} />
+
+                    <View style={[flex_row, Style.borderRadius(10), mt_5]}>
+                        <Text style={{ flexGrow: 1 }}>Total:</Text>
+                        <View style={flex_row}>
+                            <Text style={[fw_bold, Style.textColor('#0077b6'), Style.fontSize(15)]}>{deliveryPrice - promoPrice}</Text>
+                            <Text> VND</Text>
+                        </View>
+                    </View>
+                </View>
             </Shadow>
+
         </ScrollView>
     )
 }
@@ -735,6 +879,15 @@ function Recipient(props: RecipientProps) {
 // --------------------------------------------
 
 const styles = StyleSheet.create({
+    loadingDialog: {
+        width: 180,
+        maxHeight: 300,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 10,
+        padding: 20
+    },
+
     rootContainer: {
         paddingTop: StatusBar.currentHeight + 50,
         height: '100%',

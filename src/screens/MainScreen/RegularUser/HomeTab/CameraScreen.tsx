@@ -38,7 +38,7 @@ function ICamera(props: ICameraProps) {
     const [uri, setUri] = useState<undefined | string>(undefined)
     const photo = useRef<PhotoFile>()
 
-
+    photo.current?.isRawPhoto
 
     function takeSnapshot() {
         camera.current?.takeSnapshot()
@@ -46,6 +46,7 @@ function ICamera(props: ICameraProps) {
                 photo.current = file
                 if (file) {
                     setUri(file.path)
+                    console.log('----------- uri - camera: ', file.path)
                 } else
                     throw 'file is null'
             })
@@ -68,6 +69,7 @@ function ICamera(props: ICameraProps) {
         try {
             const result = await launchImageLibrary({ mediaType: 'photo', selectionLimit: 1 })
             setUri(result.assets?.[0].uri)
+            console.log('----------- uri - lib: ', result.assets?.[0])
         } catch (error) {
             ToastAndroid.show('Android system has prevented this action', ToastAndroid.LONG)
         }

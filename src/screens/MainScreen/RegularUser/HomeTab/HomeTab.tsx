@@ -20,7 +20,7 @@ interface LocationSelectorProps {
     onRouteChosen?: (routeData: { startingPointData: Data, destinationData: Data }) => void,
     startingPoint: React.MutableRefObject<LocationService.LocationIQ.Response.Data | undefined>,
     destination: React.MutableRefObject<LocationService.LocationIQ.Response.Data | undefined>,
-
+    disablePressable?: boolean
 }
 
 export const LocationSelector = React.forwardRef((props: LocationSelectorProps, ref: any) => {
@@ -74,7 +74,8 @@ export const LocationSelector = React.forwardRef((props: LocationSelectorProps, 
     }
 
     const navigateToLocationPicker = () => {
-        navigation.navigate('LocationPicker')
+        if ([false, undefined].includes(props.disablePressable))
+            navigation.navigate('LocationPicker')
     }
 
     function switchLocations() {
@@ -165,7 +166,7 @@ const openLocationPicker = (navigation: Object) => {
 export default function HomeTab(props: HomeTabProps) {
     const topImageSize = useRef<{ width: number, height: number }>()
     const [triggerRererender, setTriggerRererender] = useState(0)
-    const [viewPriceBtnEnabled, setViewPriceBtnEnabled] = useState(true)
+    const [viewPriceBtnEnabled, setViewPriceBtnEnabled] = useState(false)
     const startingPoint = useRef<Data>()
     const destination = useRef<Data>()
     const locationSelectorRef = useRef({})

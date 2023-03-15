@@ -33,7 +33,6 @@ const onLocationTyped = throttle(
     (text: string, currentInputIndex: number, onRefreshNeeded?: () => void) => {
         getSuggestionsData(text,
             (dataList) => {
-                console.log('++++++++++++ 12320792309730: ', dataList)
                 if (currentInputIndex === PICKUP_LOC_INDEX)
                     startingPointDataList = dataList
                 else
@@ -324,7 +323,7 @@ function getGPSLocation(onGetSuccessfully: (coordinates: LocationService.Coordin
         position => {
             const lat = position.coords.latitude
             const long = position.coords.longitude
-
+            console.log(`-------- gps loc: ${lat} - ${long}`)
             onGetSuccessfully({ latitude: lat, longitude: long })
         },
         error => onGetFailed?.(error),

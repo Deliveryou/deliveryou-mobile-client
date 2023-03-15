@@ -8,7 +8,7 @@ import {
   Text,
   useColorScheme,
   View,
-  Alert, DeviceEventEmitter
+  Alert, DeviceEventEmitter, ToastAndroid
 } from 'react-native';
 
 import {
@@ -36,6 +36,7 @@ import { APIService } from './src/services/APIService';
 import { UserService } from './src/services/UserService';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
 import CameraScreen from './src/screens/MainScreen/RegularUser/HomeTab/CameraScreen';
+import OfferScreen from './src/screens/MainScreen/RegularUser/HomeTab/OfferScreen';
 
 
 const Stack = createNativeStackNavigator()
@@ -67,6 +68,13 @@ const MainScreen = () => {
             <Stack.Screen
               name='CameraScreen'
               component={CameraScreen}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='OfferScreen'
+              component={OfferScreen}
               options={{
                 animation: 'slide_from_right',
               }}
@@ -161,17 +169,17 @@ const App = () => {
         Global.User.CurrentUser.id = loginInfo.id
         Global.DEFAULT_ENDPOINT.SET_ACCESS_TOKEN(loginInfo.accessToken)
         DeviceEventEmitter.emit('event.app.authenticationState', true)
-      },
-      () => {
 
-      }
+        const client = new ApolloClient({
+          uri: APIService.buildDefaultEndpoint('graphql'),
+          cache: new InMemoryCache()
+        });
+        Global.GraphQL.setClient(client)
+      },
+      () => ToastAndroid.show("Your login session has expired!", ToastAndroid.SHORT)
     )
     // -----------------
-    const client = new ApolloClient({
-      uri: APIService.buildDefaultEndpoint('graphql'),
-      cache: new InMemoryCache()
-    });
-    Global.GraphQL.setClient(client)
+
     // -----------------
 
   }, [])

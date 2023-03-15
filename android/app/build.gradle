@@ -249,6 +249,8 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-fs')
+
     implementation project(':react-native-secure-key-store')
     // For animated GIF support
     implementation 'com.facebook.fresco:animated-gif:2.5.0'

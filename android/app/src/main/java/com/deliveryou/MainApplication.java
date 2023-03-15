@@ -13,6 +13,7 @@ import com.deliveryou.newarchitecture.MainApplicationReactNativeHost;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.reactlibrary.securekeystore.RNSecureKeyStorePackage;
+import com.rnfs.RNFSPackage; // <------- add package
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -28,7 +29,7 @@ public class MainApplication extends Application implements ReactApplication {
       List<ReactPackage> packages = new PackageList(this).getPackages();
       // Packages that cannot be autolinked yet can be added manually here, for
       // example:
-      // packages.add(new RNSecureKeyStorePackage());
+      // packages.add(new RNFSPackage());
       return packages;
     }
 
