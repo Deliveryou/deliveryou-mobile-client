@@ -33,6 +33,8 @@ export const LocationSelector = React.forwardRef((props: LocationSelectorProps, 
     const destinationInput = useRef<TextInput>()
     const [switchEnabled, setSwitchEnabled] = useState(false)
 
+    StatusBar.setBackgroundColor('transparent')
+
     useEffect(() => {
         DeviceEventEmitter.addListener('event.onRouteSelected', (routeData: { startingPointData: Data, destinationData: Data }) => {
             if (routeData && routeData.destinationData && routeData.destinationData) {

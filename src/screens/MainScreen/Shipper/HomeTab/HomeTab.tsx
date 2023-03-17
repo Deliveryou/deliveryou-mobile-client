@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react'
 import { align_items_center, align_self_center, bg_black, bg_danger, bg_dark, bg_primary, bg_warning, bg_white, border_radius_pill, bottom_0, flex_1, flex_row, fs_large, fs_semi_large, fw_bold, justify_center, left_0, ml_5, mr_10, mr_5, mt_10, mt_20, mt_25, mt_5, mx_10, overflow_hidden, pl_10, position_absolute, px_10, py_10, py_5, p_10, Style, w_100, w_75 } from '../../../../stylesheets/primary-styles'
 import { Avatar, Button, Dialog, Icon } from '@rneui/themed'
 import { Shadow } from 'react-native-shadow-2'
+import { UserService } from '../../../../services/UserService'
 
 const ON_TO_OFF = require('../../../../resources/gifs/on_to_off.gif')
 const OFF_TO_ON = require('../../../../resources/gifs/off_to_on.gif')
@@ -18,14 +19,33 @@ export default function HomeTab(props: HomeTabProps) {
     const [isOff, setIsOff] = useState(true)
     const canSwitch = useRef(true)
 
+    function isActive() {
+        UserService.registerAsActive(
+            () => setIsOff(false),
+            () => {
+                ToastAndroid.show('Cannot turn on', ToastAndroid.LONG)
+                setIsOff(true)
+            }
+        )
+        console.log('on')
+    }
+
+    function isInactive() {
+        UserService.registerAsInactive(
+            () => setIsOff(true),
+            () => ToastAndroid.show('Cannot turn off', ToastAndroid.LONG)
+        )
+        console.log('off')
+    }
+
     return (
         <View style={styles.rootContainer}>
             <Pressable
                 style={styles.gifButtonContainer}
                 onPress={() => {
                     if (canSwitch.current) {
-                        canSwitch.current = false
-                        setIsOff(!isOff)
+                        canSwitch.current = false;
+                        (isOff) ? isActive() : isInactive()
                         setTimeout(() => canSwitch.current = true, 2000)
                     }
                 }}
@@ -195,13 +215,13 @@ const styles = StyleSheet.create({
     gifButton: {
         width: 300,
         height: 300,
-        ...Style.border('#000', 1, 'solid')
     },
 
     gifButtonContainer: {
         alignSelf: 'center',
         ...border_radius_pill,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        backgroundColor: 'transparent'
     },
 
     option: {

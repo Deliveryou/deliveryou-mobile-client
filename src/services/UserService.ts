@@ -6,22 +6,44 @@ export namespace UserService {
     let registerOnlineStatus: boolean = false
     let interval: NodeJS.Timer | undefined = undefined
 
-    export function registerAsActive(onSuccess?: (res: AxiosResponse) => void, onFailure?: (error: AxiosError) => void) {
+    export function registerAsActive(onSuccess?: (res: AxiosResponse) => void, onFailure?: (error?: AxiosError) => void) {
         if (registerOnlineStatus === false) {
             registerOnlineStatus = true
 
             if (interval)
-                clearInterval(interval)
+                clearInterval(interval);
 
-            iAm('online', onSuccess, onFailure)
-            interval = setInterval(() => iAm('online', onSuccess, onFailure), 9500)
+            function ifFailed() {
+                registerOnlineStatus = false
+                if (interval)
+                    clearInterval(interval)
+            }
+
+            iAm('online', onSuccess, () => {
+                ifFailed()
+                onFailure?.()
+            })
+
+            interval = setInterval(() =>
+                iAm('online', onSuccess, () => {
+                    ifFailed()
+                    onFailure?.()
+                }),
+                9500
+            )
         }
     }
 
-    export function registerAsInactive(onSuccess?: (res: AxiosResponse) => void, onFailure?: (error: AxiosError) => void) {
-        registerOnlineStatus = false
-        if (interval)
-            clearInterval(interval)
+    export function registerAsInactive(onSuccess?: () => void, onFailure?: (error?: AxiosError) => void) {
+        iAm("offline",
+            () => {
+                registerOnlineStatus = false
+                if (interval)
+                    clearInterval(interval)
+                onSuccess?.()
+            },
+            () => onFailure?.()
+        )
     }
 
     export function iAm(mode: 'online' | 'offline' = 'online', onResponse?: (response: AxiosResponse) => void, onError?: (error: any) => void) {

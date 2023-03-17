@@ -11,6 +11,19 @@ export namespace DeliveryService {
             distance: number
         }
 
+        export interface DeliveryPackage {
+            user: { id: number },
+            photoUrl: string,
+            promotion: { id: number },
+            price: number,
+            senderAddress: { longitude: number, latitude: number },
+            recipientAddress: { longitude: number, latitude: number },
+            recipientName: string,
+            recipientPhone: string,
+            note: string,
+            packageType: { name: string }
+        }
+
 
         export function advisorPrice(startingPoint: Coordinates, destination: Coordinates,
             onSuccess?: (data: AdvisorResponse) => void, onFailure?: (error?: any) => void) {
@@ -30,6 +43,12 @@ export namespace DeliveryService {
                 .then(data => onSuccess?.(data))
                 .catch(error => onFailure?.(error))
 
+        }
+
+        export function uploadDeliveryPackage(deliveryPackage: DeliveryPackage, onSuccess?: () => void, onFailure?: (error?: any) => void) {
+            APIService.axios("/api/user/package/upload", "post", deliveryPackage)
+                .then(response => onSuccess?.())
+                .catch(error => onFailure?.(error))
         }
     }
 }

@@ -193,14 +193,13 @@ export namespace LocationService {
         }
 
         export function direction(pointA: LocationService.Coordinates, pointB: LocationService.Coordinates, onRequestSuccessfully: (responseData: Response.Direction) => void, onRequestFailed?: (error: any) => void) {
-            const endpoint = `https://us1.locationiq.com/v1/directions/driving/${pointA.latitude},${pointA.longitude};${pointB.latitude},${pointB.longitude}?key=${ACCESS_TOKEN}&steps=true&alternatives=true&geometries=polyline&overview=full`
+            const endpoint = `https://us1.locationiq.com/v1/directions/driving/${pointA.longitude},${pointA.latitude};${pointB.longitude},${pointB.latitude}?key=${ACCESS_TOKEN}&steps=true&alternatives=true&geometries=polyline&overview=full`
 
             axios.get(endpoint)
                 .then(response => response.data as Response.Direction)
                 .then(direction => onRequestSuccessfully(direction))
                 .catch(error => onRequestFailed?.(error))
         }
-
 
     }
 

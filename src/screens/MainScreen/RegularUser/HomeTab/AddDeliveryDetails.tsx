@@ -17,6 +17,7 @@ import { CameraDevice } from 'react-native-vision-camera/lib/typescript/CameraDe
 import Validator from '../../../../utils/Validator'
 import { ImageUploadService } from '../../../../services/ImageUploadService'
 import { DeliveryService } from '../../../../services/DeliveryService'
+import { APIService } from '../../../../services/APIService'
 
 const BOX_SHADOW_COLOR = '#6c757d26'
 
@@ -42,10 +43,11 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
     const photoUri = useRef<string | undefined>(undefined)
     const promotion = useRef<Promotion>()
     const price = useRef<DeliveryService.User.AdvisorResponse>({ distance: 0, price: 0 })
-    const [loadingDialogVisible, setLoadingDialogVisible] = useState(true)
+    const [loadingDialogVisible, setLoadingDialogVisible] = useState(false)
     const loadingDialogContent = useRef('')
 
     const refresh = () => setRefresh(value => value + 1)
+    type Data = LocationService.LocationIQ.Response.Data
 
     useEffect(() => {
         DeviceEventEmitter.addListener(
@@ -69,9 +71,9 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
     }
 
     function reloadAddresses() {
-        const s_addr = (route.params.startingPointRef.current as LocationService.LocationIQ.Response.Data).display_name
+        const s_addr = (route.params.startingPointRef.current as Data).display_name
         senderInfo.current.address = s_addr
-        const r_addr = (route.params.destinationRef.current as LocationService.LocationIQ.Response.Data).display_name
+        const r_addr = (route.params.destinationRef.current as Data).display_name
         recipientInfo.current.address = r_addr
         refresh()
     }
@@ -82,7 +84,7 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                 validatePersonInfo(recipientInfo.current, 'Recipient')
                     .then(() => {
                         if (photoUri.current) {
-                            //console.log('---------- uri: ', photoUri.current)
+                            console.log('---------- uri: ', photoUri.current)
                             ImageUploadService.upload(photoUri.current, {
                                 onUploadBegan: () => {
                                     loadingDialogContent.current = 'Uploading your photo'
@@ -92,16 +94,50 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                                     console.log('------- upload url: ', url)
                                     setLoadingDialogVisible(false)
                                     loadingDialogContent.current = ''
+
+                                    // calculate price
+                                    let promoPrice = 0
+                                    if (promotion.current) {
+                                        promoPrice = promotion.current.discountPercentage * price.current.price
+                                        promoPrice = (promoPrice > promotion.current.maximumDiscountAmount) ? promotion.current.maximumDiscountAmount : promoPrice
+                                    }
+                                    const totalPrice = price.current.price - promoPrice
+
+                                    // upload obj
+                                    const deliveryPackage: DeliveryService.User.DeliveryPackage = {
+                                        user: { id: Global.User.CurrentUser.id },
+                                        photoUrl: url,
+                                        promotion: { id: (promotion.current) ? promotion.current.id : -1 },
+                                        price: totalPrice,
+                                        senderAddress: {
+                                            latitude: Number((route.params.startingPointRef.current as Data).lat),
+                                            longitude: Number((route.params.startingPointRef.current as Data).lon)
+                                        },
+                                        recipientAddress: {
+                                            latitude: Number((route.params.destinationRef.current as Data).lat),
+                                            longitude: Number((route.params.destinationRef.current as Data).lon)
+                                        },
+                                        recipientName: recipientInfo.current.name,
+                                        recipientPhone: recipientInfo.current.phone,
+                                        note: note.current,
+                                        packageType: { name: currentItemTypeDetails.current.name }
+                                    }
+
+                                    console.log('----- upload: ', deliveryPackage)
+                                    // main
+                                    DeliveryService.User
+                                        .uploadDeliveryPackage(
+                                            deliveryPackage,
+                                            () => ToastAndroid.show('uploaded', ToastAndroid.LONG),
+                                            (error) => {
+                                                ToastAndroid.show('upload failed', ToastAndroid.LONG)
+                                                console.log("------ upload error: ", { ...error })
+                                            },
+                                        )
                                 },
                                 onUploadFailure: () => ToastAndroid.show('Failed to upload your photo', ToastAndroid.LONG)
                             })
-                            // main
-                            console.log('--- post: ', {
-                                senderInfo,
-                                recipientInfo,
-                                note,
-                                itemType: currentItemTypeDetails.current.name
-                            })
+
                         } else
                             ToastAndroid.show('Product photo is required', ToastAndroid.LONG)
                     })

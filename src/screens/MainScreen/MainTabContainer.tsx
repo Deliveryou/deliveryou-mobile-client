@@ -8,6 +8,7 @@ import ChatTab from './Common/Chat/ChatTab'
 import RegularUserHomeTab from './RegularUser/HomeTab/HomeTab'
 import ShipperHomeTab from './Shipper/HomeTab/HomeTab'
 import ShipperProfileTab from './Shipper/ProfileTab/ProfileTab'
+import UserProfileTab from './RegularUser/ProfileTab/ProfileTab'
 
 interface TabViewsProps {
     value: number,
@@ -52,7 +53,10 @@ export default function MainTabContainer(props: TabViewsProps) {
             <TabView.Item style={[w_100, bg_transparent]}>
                 {
                     (props.userType === Global.User.Type.REGULAR_USER) ?
-                        null
+                        <UserProfileTab
+                            navigation={props.navigation}
+                            route={props.route}
+                        />
                         :
                         <ShipperProfileTab
                             navigation={props.navigation}
