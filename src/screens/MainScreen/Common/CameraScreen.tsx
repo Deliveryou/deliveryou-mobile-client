@@ -1,6 +1,6 @@
 import { View, Text, StatusBar, StyleSheet, Linking, TouchableOpacity, DeviceEventEmitter, ToastAndroid, Image, ImageSourcePropType } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import { align_items_center, align_self_baseline, align_self_center, align_self_flex_start, bg_danger, bg_primary, border_radius_pill, bottom_0, flex_1, flex_row, fs_semi_large, justify_center, left_0, mb_20, mr_10, mr_20, position_absolute, py_10, py_5, Style, text_white, top_0, w_100 } from '../../../../stylesheets/primary-styles'
+import { align_items_center, align_self_baseline, align_self_center, align_self_flex_start, bg_danger, bg_primary, border_radius_pill, bottom_0, flex_1, flex_row, fs_semi_large, justify_center, left_0, mb_20, mr_10, mr_20, position_absolute, py_10, py_5, Style, text_white, top_0, w_100 } from '../../../stylesheets/primary-styles'
 import { Camera, useCameraDevices, CameraDevice, PhotoFile } from 'react-native-vision-camera'
 import { Button, Icon } from '@rneui/themed'
 import { BlurView } from '@react-native-community/blur'
@@ -8,16 +8,16 @@ import { launchImageLibrary } from 'react-native-image-picker';
 
 export default function CameraScreen({ route, navigation }) {
     const devices = useCameraDevices()
-    const device = devices.back
+    const device = (route.params?.useFront) ? devices.front : devices.back
 
     return (
         <View style={flex_1}>
             {
-                (device != null) ?
+                (device) ?
                     <ICamera
                         navigation={navigation}
                         route={route}
-                        device={device}
+                        intialDevice={device}
                     />
                     :
                     <NotAvailable />
@@ -28,15 +28,17 @@ export default function CameraScreen({ route, navigation }) {
 
 // -------------------------------------------------------
 interface ICameraProps {
-    device: CameraDevice,
     navigation: any,
-    route: any
+    route: any,
+    intialDevice: CameraDevice,
 }
 
 function ICamera(props: ICameraProps) {
     const camera = useRef<Camera>(null)
     const [uri, setUri] = useState<undefined | string>(undefined)
     const photo = useRef<PhotoFile>()
+    const devices = useCameraDevices()
+    const [device, setDevice] = useState(props.intialDevice)
 
     photo.current?.isRawPhoto
 
@@ -75,6 +77,20 @@ function ICamera(props: ICameraProps) {
         }
     }
 
+    function flip() {
+        if (device.name.toLowerCase().includes('back') && devices.front) {
+            setDevice(devices.front)
+            console.log('flip')
+            return
+        }
+        if (device.name.toLowerCase().includes('front') && devices.back) {
+            setDevice(devices.back)
+            console.log('flip')
+            return
+        }
+    }
+
+
     return (
         <View style={flex_1}>
             {
@@ -88,9 +104,10 @@ function ICamera(props: ICameraProps) {
                     :
                     <ActiveCamera
                         lauchPhotoLibrary={lauchPhotoLibrary}
-                        device={props.device}
+                        device={device}
                         takeSnapshot={takeSnapshot}
                         iref={camera}
+                        onFlip={flip}
                     />
             }
         </View >
@@ -111,6 +128,7 @@ function PreviewCamera(props: PreviewCameraProps) {
         if (props.photoPath) {
             props.navigation.goBack()
             DeviceEventEmitter.emit('event.AddDeliveryDetails.onPhotoChosen', props.photoPath)
+            DeviceEventEmitter.emit('event.ProfileEditor.onPhotoChosen', props.photoPath)
         } else
             ToastAndroid.show('Cannot use this photo', ToastAndroid.SHORT)
     }
@@ -151,8 +169,9 @@ function PreviewCamera(props: PreviewCameraProps) {
 interface ActiveCameraProps {
     device: CameraDevice,
     takeSnapshot?: () => void,
-    lauchPhotoLibrary?: () => void
-    iref?: React.RefObject<Camera>
+    lauchPhotoLibrary?: () => void,
+    iref?: React.RefObject<Camera>,
+    onFlip?: () => void
 }
 
 function ActiveCamera(props: ActiveCameraProps) {
@@ -176,6 +195,13 @@ function ActiveCamera(props: ActiveCameraProps) {
 
                     <TouchableOpacity onPress={props.takeSnapshot}>
                         <Icon name='radio-button-on' type='ion-icon' size={70} color='#f9f7f3' />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={{ position: 'absolute', right: 15, bottom: 15 }}
+                        onPress={props.onFlip}
+                    >
+                        <Icon name='camera-flip' type='material-community' color={'#f9f7f3'} size={40} />
                     </TouchableOpacity>
                 </View>
             </View>

@@ -2,6 +2,7 @@ import axios from "axios";
 import { PermissionsAndroid } from "react-native";
 import PropTypes from 'prop-types';
 import { Directions } from "react-native-gesture-handler";
+import Geolocation from 'react-native-geolocation-service';
 
 export namespace LocationService {
 
@@ -60,6 +61,19 @@ export namespace LocationService {
             return false
 
         return (origin.latitude == target.latitude && origin.longitude == target.longitutde)
+    }
+
+    export function getGPSLocation(onSuccess?: (coordinates: Coordinates) => void, onFailure?: (error?: any) => void) {
+        Geolocation.getCurrentPosition(
+            position => {
+                const lat = position.coords.latitude
+                const long = position.coords.longitude
+                console.log(`-------- gps loc: ${lat} - ${long}`)
+                onSuccess?.(({ latitude: lat, longitude: long }))
+            },
+            error => onFailure?.(error),
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 10000 },
+        )
     }
 
     export namespace LocationIQ {

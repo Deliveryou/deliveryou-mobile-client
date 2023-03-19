@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '@rneui/themed'
 import { AuthenticationService } from '../../../../services/AuthenticationService'
 
-export default function ProfileTab() {
+export default function ProfileTab({ route, navigation }) {
     const failedLogoutAttempt = useRef(0)
 
     function failedLogoutAttemptAlert() {

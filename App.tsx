@@ -35,8 +35,9 @@ import SockJs from 'react-stomp';
 import { APIService } from './src/services/APIService';
 import { UserService } from './src/services/UserService';
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
-import CameraScreen from './src/screens/MainScreen/RegularUser/HomeTab/CameraScreen';
+import CameraScreen from './src/screens/MainScreen/Common/CameraScreen';
 import OfferScreen from './src/screens/MainScreen/RegularUser/HomeTab/OfferScreen';
+import ProfileEditor from './src/screens/MainScreen/Common/Profile/ProfileEditor';
 
 
 const Stack = createNativeStackNavigator()
@@ -61,13 +62,6 @@ const MainScreen = () => {
             <Stack.Screen
               name='AddDeliveryDetails'
               component={AddDeliveryDetails}
-              options={{
-                animation: 'slide_from_right',
-              }}
-            />
-            <Stack.Screen
-              name='CameraScreen'
-              component={CameraScreen}
               options={{
                 animation: 'slide_from_right',
               }}
@@ -99,8 +93,22 @@ const MainScreen = () => {
                 animation: 'slide_from_right',
               }}
             />
+            <Stack.Screen
+              name='ProfileEditor'
+              component={ProfileEditor}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
           </> : null
       }
+      <Stack.Screen
+        name='CameraScreen'
+        component={CameraScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
     </Stack.Navigator>
   )
 }

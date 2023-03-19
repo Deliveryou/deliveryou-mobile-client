@@ -1,4 +1,4 @@
-import { StatusBar, StyleSheet, View, ColorValue, StatusBarStyle, BackHandler } from 'react-native'
+import { StatusBar, StyleSheet, View, ColorValue, StatusBarStyle, BackHandler, StyleProp, TextStyle } from 'react-native'
 import React, { useEffect } from 'react'
 import { Icon, Text } from '@rneui/themed'
 import { fs_large, fw_bold, Style, text_white, w_100 } from '../stylesheets/primary-styles'
@@ -13,7 +13,8 @@ interface SimpleHeaderNavigationProps {
   navigation: object,
   parentStatusBarValues?: StatusBarValues,
   newStatusBarValues?: StatusBarValues,
-  titleBarColor?: ColorValue
+  titleBarColor?: ColorValue,
+  titleStyle?: StyleProp<TextStyle>
 }
 
 export default function SimpleHeaderNavigation(props: SimpleHeaderNavigationProps) {
@@ -48,12 +49,22 @@ export default function SimpleHeaderNavigation(props: SimpleHeaderNavigationProp
   }
 
   const titleBarColor = (props.titleBarColor) ? Style.backgroundColor(props.titleBarColor) : {}
+  let titleStyle = {}
+  if (props.titleStyle) {
+    if (Array.isArray(props.titleStyle))
+      titleStyle = { ...props.titleStyle }
+    else
+      titleStyle = props.titleStyle
+  }
+
+  let iconColor = titleStyle?.color
+  iconColor = (iconColor) ? iconColor : '#fff'
 
   return (
     <View style={[styles.rootHeader, titleBarColor]}>
-      <Icon onPress={goBack} containerStyle={styles.rootHeaderIcon} name='chevron-back' type='ionicon' color={'white'} />
+      <Icon onPress={goBack} containerStyle={styles.rootHeaderIcon} name='chevron-back' type='ionicon' color={iconColor} />
       <View style={styles.rootHeaderText}>
-        <Text style={[fs_large, fw_bold, text_white]}>{props.title}</Text>
+        <Text style={[fs_large, fw_bold, text_white, titleStyle]}>{props.title}</Text>
       </View>
     </View>
   )

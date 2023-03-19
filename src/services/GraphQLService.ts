@@ -13,6 +13,16 @@ export namespace GraphQLService {
             applicablePrice: number
             expireDate?: string
         }
+
+        export type User = {
+            id: number,
+            firstName: string,
+            lastName: string,
+            phone: string,
+            citizenId?: string,
+            profilePictureUrl?: string,
+            dateOfBirth?: string
+        }
     }
 
     export namespace Schema {
@@ -26,6 +36,9 @@ export namespace GraphQLService {
             firstName = 'firstName',
             lastName = 'lastName',
             phone = 'phone',
+            citizenId = 'citizenId',
+            profilePictureUrl = 'profilePictureUrl',
+            dateOfBirth = 'dateOfBirth'
         }
 
         export enum Promotion {
@@ -101,6 +114,13 @@ export namespace GraphQLService {
     }
 
     // ------ PUBLIC MEMBERS
+    export function getCurrentUser(id: number, onGetSuccess?: (data: Type.User) => void, onGetFailure?: (error: any) => void) {
+        const u = Schema.User
+        userById(id, [u.id, u.firstName, u.lastName, u.phone, u.citizenId, u.dateOfBirth, u.profilePictureUrl])
+            .then(result => onGetSuccess?.(result.data[Schema.Query.userById]))
+            .catch(error => onGetFailure?.(error))
+    }
+
     export function getCurrentUserInfo(id: number, onGetSuccess?: (data: User) => void, onGetFailure?: (error: any) => void) {
         const u = Schema.User
         userById(id, [u.id, u.firstName, u.lastName, u.phone])
