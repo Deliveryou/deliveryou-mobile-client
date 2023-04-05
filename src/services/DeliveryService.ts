@@ -1,5 +1,7 @@
 import axios from "axios";
+import { Global } from "../Global";
 import { APIService } from "./APIService";
+import { GraphQLService } from "./GraphQLService";
 import { LocationService } from "./LocationService";
 
 type Coordinates = LocationService.Coordinates
@@ -48,6 +50,21 @@ export namespace DeliveryService {
         export function uploadDeliveryPackage(deliveryPackage: DeliveryPackage, onSuccess?: () => void, onFailure?: (error?: any) => void) {
             APIService.axios("/api/user/package/upload", "post", deliveryPackage)
                 .then(response => onSuccess?.())
+                .catch(error => onFailure?.(error))
+        }
+    }
+
+    export namespace Shipper {
+        export function registerPackage(details: { shipperId: number, packageId: number }, onSuccess?: () => void, onFailure?: (error?: any) => void) {
+            APIService.axios("/api/shipper/package/accept-request", "post", details)
+                .then(reponse => onSuccess?.())
+                .catch(error => onFailure?.(error))
+        }
+
+        export function getActivePackage(onSuccess: (deliveryPackage: GraphQLService.Type.DeliveryPackage) => void, onFailure?: (error?: any) => void) {
+            APIService.axios(`/api/shared/package/get-active-package/${Global.User.CurrentUser.id}`)
+                .then(reponse => reponse.data as GraphQLService.Type.DeliveryPackage)
+                .then(dpackage => onSuccess(dpackage))
                 .catch(error => onFailure?.(error))
         }
     }

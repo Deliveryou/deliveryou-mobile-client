@@ -14,6 +14,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.reactlibrary.securekeystore.RNSecureKeyStorePackage;
 import com.rnfs.RNFSPackage; // <------- add package
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.appcheck.FirebaseAppCheck;
+import com.google.firebase.appcheck.safetynet.SafetyNetAppCheckProviderFactory;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -57,6 +60,12 @@ public class MainApplication extends Application implements ReactApplication {
     ReactFeatureFlags.useTurboModules = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+
+    // Initialize FirebaseApp
+    FirebaseApp.initializeApp(this);
+    // Initialize FirebaseAppCheck
+    FirebaseAppCheck firebaseAppCheck = FirebaseAppCheck.getInstance();
+    firebaseAppCheck.installAppCheckProviderFactory(SafetyNetAppCheckProviderFactory.getInstance());
   }
 
   /**

@@ -4,9 +4,41 @@ import { Avatar, Button, Icon } from '@rneui/themed'
 import { AuthenticationService } from '../../../../services/AuthenticationService'
 import { align_items_center, align_self_center, bg_black, bg_danger, bg_primary, bg_white, border_radius_pill, flex_1, flex_row, fs_large, fs_semi_large, fw_bold, h_100, justify_center, mb_10, mb_5, ml_10, ml_5, mr_10, mr_15, mr_20, mt_0, mt_10, mt_20, mt_25, mt_5, m_15, px_10, px_15, px_25, py_10, py_15, py_20, py_5, p_10, p_15, p_5, Style, text_black, w_100 } from '../../../../stylesheets/primary-styles'
 import { Shadow } from 'react-native-shadow-2'
+import { GraphQLService } from '../../../../services/GraphQLService'
+import { Global } from '../../../../Global'
 
 export default function ProfileTab({ route, navigation }) {
     const failedLogoutAttempt = useRef(0)
+    const currentUser = useRef<GraphQLService.Type.User>();
+    const [_refresh, setRefresh] = useState(0)
+
+    const refresh = () => setRefresh(value => value + 1)
+
+    useEffect(() => {
+        DeviceEventEmitter.addListener('event.Shipper.ProfileTab.onUserInfoChanged', getUser)
+        console.log('------ started to get user')
+        // waiting for apollo client to be set before using graphql
+        setTimeout(getUser, 650)
+    }, [])
+
+    function getUser() {
+        const u = GraphQLService.Schema.User
+        console.log('------ get user invoked')
+
+        GraphQLService.getCurrentUser(
+            Global.User.CurrentUser.id,
+            [u.profilePictureUrl, u.firstName, u.lastName, u.phone],
+            (user) => {
+                console.log('------ get user')
+                currentUser.current = user
+                refresh()
+            },
+            () => {
+                ToastAndroid.show('Cannot contact server!\nCheck your connection', ToastAndroid.LONG)
+            },
+            true
+        )
+    }
 
     function failedLogoutAttemptAlert() {
         Alert.alert("😔  Seems like you're having trouble logging out!",
@@ -46,19 +78,19 @@ export default function ProfileTab({ route, navigation }) {
                     <Avatar
                         size={100}
                         rounded
-                        source={{ uri: "https://randomuser.me/api/portraits/men/36.jpg" }}
+                        source={{ uri: currentUser.current?.profilePictureUrl }}
                         containerStyle={Style.border('#fff', 5, 'solid')}
                     />
                 </View>
                 <View style={styles.profileImgText}>
-                    <Text style={[fs_large, fw_bold, Style.textColor('#43474E')]}>Andie W</Text>
+                    <Text style={[fs_large, fw_bold, Style.textColor('#43474E')]}>{currentUser.current?.firstName + ' ' + currentUser.current?.lastName}</Text>
                     <View style={[flex_row, align_items_center, mt_5]}>
                         <Icon name='checkcircle' type='antdesign' size={15} color='#38b000' />
                         <Text style={ml_5}>Verified shipper</Text>
                     </View>
                     <View style={[flex_row, align_items_center, mt_5]}>
                         <Icon name='telephone' type='foundation' size={22} color='#8a817c' />
-                        <Text style={[ml_5, fs_semi_large, Style.textColor('#43474E')]}>0123456789</Text>
+                        <Text style={[ml_5, fs_semi_large, Style.textColor('#43474E')]}>{currentUser.current?.phone}</Text>
                     </View>
                 </View>
             </View>

@@ -37,6 +37,23 @@ export function throttle(callback: Function, delay: number = 1000) {
 
 }
 
+export function throttleFunc(func: Function, limit: number) {
+  // Initialize a flag to indicate if the function is currently executing
+  let inThrottle = false;
+  // Return a new function that takes the same arguments as the original function
+  return function (...args: any[]) {
+    // If the flag is false, meaning the function is not executing
+    if (!inThrottle) {
+      // Call the original function with the given arguments
+      func(...args);
+      // Set the flag to true, indicating the function is executing
+      inThrottle = true;
+      // Set a timeout to reset the flag after the limit period
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }
+}
+
 /**
  * Automatically re-excecute callback if its returned value is false
  * @param callback must return a boolean value determining result state

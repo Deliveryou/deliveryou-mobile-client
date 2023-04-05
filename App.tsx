@@ -38,7 +38,14 @@ import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
 import CameraScreen from './src/screens/MainScreen/Common/CameraScreen';
 import OfferScreen from './src/screens/MainScreen/RegularUser/HomeTab/OfferScreen';
 import ProfileEditor from './src/screens/MainScreen/Common/Profile/ProfileEditor';
+import TestScreen from './src/screens/MainScreen/Common/Profile/TestScreen';
+import ChatScreen from './src/screens/MainScreen/Common/Chat/ChatScreen';
+import PhotoPreviewer from './src/screens/MainScreen/Shipper/HomeTab/PhotoPreviewer';
 
+// ----------------------------------------------
+
+
+// ----------------------------------------------
 
 const Stack = createNativeStackNavigator()
 
@@ -94,17 +101,39 @@ const MainScreen = () => {
               }}
             />
             <Stack.Screen
-              name='ProfileEditor'
-              component={ProfileEditor}
+              name='PhotoPreviewer'
+              component={PhotoPreviewer}
               options={{
                 animation: 'slide_from_right',
               }}
             />
           </> : null
       }
+
+      <Stack.Screen
+        name='ProfileEditor'
+        component={ProfileEditor}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
       <Stack.Screen
         name='CameraScreen'
         component={CameraScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name='ChatScreen'
+        component={ChatScreen}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name='TestScreen'
+        component={TestScreen}
         options={{
           animation: 'slide_from_right',
         }}
@@ -163,6 +192,7 @@ const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
   const [isAuthenticated, setAuthenticated] = useState(false)
 
+
   useEffect(() => {
     NetInfo.fetch().then(state => {
       if (state.isInternetReachable === false)
@@ -205,7 +235,7 @@ const App = () => {
     <>
       <SockJs
         url={APIService.buildDefaultEndpoint('/websocket')}
-        topics={['/topic/greetings', `/user/${Global.User.CurrentUser.id}/notification`]}
+        topics={['/topic/greetings']}
         onConnect={onWebSocketConnected}
         onDisconnect={onWebSocketDisconnected}
         onMessage={(msg: any) => console.log('msg: ', msg)}
