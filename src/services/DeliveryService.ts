@@ -7,6 +7,15 @@ import { LocationService } from "./LocationService";
 type Coordinates = LocationService.Coordinates
 
 export namespace DeliveryService {
+    namespace Private {
+        export function getActivePackage(onSuccess: (deliveryPackage: GraphQLService.Type.DeliveryPackage) => void, onFailure?: (error?: any) => void) {
+            APIService.axios(`/api/shared/package/get-active-package/${Global.User.CurrentUser.id}`)
+                .then(reponse => reponse.data as GraphQLService.Type.DeliveryPackage)
+                .then(dpackage => onSuccess(dpackage))
+                .catch(error => onFailure?.(error))
+        }
+    }
+
     export namespace User {
         export interface AdvisorResponse {
             price: number,
@@ -47,10 +56,39 @@ export namespace DeliveryService {
 
         }
 
-        export function uploadDeliveryPackage(deliveryPackage: DeliveryPackage, onSuccess?: () => void, onFailure?: (error?: any) => void) {
+        export function uploadDeliveryPackage(deliveryPackage: DeliveryPackage, onSuccess?: (packageId: number) => void, onFailure?: (error?: any) => void) {
             APIService.axios("/api/user/package/upload", "post", deliveryPackage)
-                .then(response => onSuccess?.())
+                .then(response => response.data)
+                .then(data => onSuccess?.(data.packageId))
                 .catch(error => onFailure?.(error))
+        }
+
+        export function getCurrentPackage(onSuccess: (deliveryPackage: GraphQLService.Type.DeliveryPackage) => void, onFailure?: (error?: any) => void) {
+            APIService.axios(`/api/shared/package/get-current-package/${Global.User.CurrentUser.id}`)
+                .then(reponse => reponse.data as GraphQLService.Type.DeliveryPackage)
+                .then(dpackage => onSuccess(dpackage))
+                .catch(error => onFailure?.(error))
+        }
+    }
+
+    export namespace Common {
+        export function packageHistory(startIndex: number, endIndex: number, onSuccess: (packages: GraphQLService.Type.DeliveryPackage[]) => void, onError?: (error: any) => void) {
+            const uploadObj = {
+                userId: Global.User.CurrentUser.id,
+                startIndex,
+                endIndex
+            }
+            APIService.axios("/api/shared/package/history", "post", uploadObj)
+                .then(response => response.data as GraphQLService.Type.DeliveryPackage[])
+                .then(list => onSuccess(list))
+                .catch(error => onError?.(error))
+        }
+
+        export function getPackage(packageId: number, onSuccess: (deliveryPackage: GraphQLService.Type.DeliveryPackage) => void, onError?: (error: any) => void) {
+            APIService.axios(`/api/shared/package/get-package-by-id/${packageId}`)
+                .then(response => response.data as GraphQLService.Type.DeliveryPackage)
+                .then(data => onSuccess(data))
+                .catch(error => onError?.(error))
         }
     }
 
@@ -61,11 +99,26 @@ export namespace DeliveryService {
                 .catch(error => onFailure?.(error))
         }
 
-        export function getActivePackage(onSuccess: (deliveryPackage: GraphQLService.Type.DeliveryPackage) => void, onFailure?: (error?: any) => void) {
-            APIService.axios(`/api/shared/package/get-active-package/${Global.User.CurrentUser.id}`)
-                .then(reponse => reponse.data as GraphQLService.Type.DeliveryPackage)
-                .then(dpackage => onSuccess(dpackage))
+        export function confirmPickup(packageId: number, onSuccess?: () => void, onFailure?: (error?: any) => void) {
+            APIService.axios(`/api/shipper/package/confirm-pickup/${packageId}`)
+                .then(reponse => onSuccess?.())
                 .catch(error => onFailure?.(error))
+        }
+
+        export function confirmFinish(packageId: number, onSuccess?: () => void, onFailure?: (error?: any) => void) {
+            APIService.axios(`/api/shipper/package/done/${packageId}`)
+                .then(reponse => onSuccess?.())
+                .catch(error => onFailure?.(error))
+        }
+
+        export function cancelDelivery(packageId: number, onSuccess?: () => void, onFailure?: (error?: any) => void) {
+            APIService.axios(`/api/shipper/package/cancel/${packageId}`)
+                .then(reponse => onSuccess?.())
+                .catch(error => onFailure?.(error))
+        }
+
+        export function getActivePackage(onSuccess: (deliveryPackage: GraphQLService.Type.DeliveryPackage) => void, onFailure?: (error?: any) => void) {
+            Private.getActivePackage(onSuccess, onFailure)
         }
     }
 }

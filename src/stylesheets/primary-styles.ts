@@ -961,8 +961,25 @@ export namespace Style {
         }
     }
 
-    export function borderRadius(value: number) {
-        return { borderRadius: value }
+    type BorderPosition = 'all' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+
+    export function borderRadius(value: number, borderPositions: BorderPosition[] = ["all"]) {
+        borderPositions = Array.from(new Set(borderPositions))
+
+        if (borderPositions.length === 0 || borderPositions.includes("all"))
+            return { borderRadius: value }
+
+        const result: { [key: string]: any } = {}
+
+        if (borderPositions.includes("bottom-left"))
+            result.borderBottomLeftRadius = value
+        if (borderPositions.includes("bottom-right"))
+            result.borderBottomRightRadius = value
+        if (borderPositions.includes("top-left"))
+            result.borderTopLeftRadius = value
+        if (borderPositions.includes("top-right"))
+            result.borderTopRightRadius = value
+        return result as StyleProp<ViewStyle>
     }
 
     export function backgroundColor(value: string | ColorValue) {

@@ -1,7 +1,7 @@
 import { Avatar, BottomSheet, Button, CheckBox, Dialog, Icon, ListItem, TabView, Text } from '@rneui/themed'
 import { View, DeviceEventEmitter, BackHandler, Image, TextInput, TextInputProps, Dimensions, StyleSheet, StatusBar, Animated, TouchableNativeFeedback, TouchableOpacity, Pressable, ToastAndroid, Alert } from 'react-native'
 import { ScrollView } from 'react-native-gesture-handler'
-import { align_items_center, align_self_center, align_self_flex_start, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_0, border_radius_1, border_radius_4, border_radius_pill, clr_primary, flex_1, flex_column, flex_row, fs_large, fs_normal, fs_semi_large, fw_500, fw_600, fw_bold, h_100, justify_center, mb_10, mb_20, mb_25, mb_5, ml_10, mr_10, mr_5, mt_0, mt_10, mt_20, mt_25, mt_5, mx_10, my_10, my_20, m_10, m_15, m_20, overflow_hidden, pb_10, pb_25, pl_10, pl_20, position_absolute, position_center, pt_15, pt_20, pt_25, px_10, px_15, px_20, py_10, py_15, py_20, p_10, p_20, Style, text_white, w_100, w_75 } from '../../../../stylesheets/primary-styles'
+import { align_items_center, align_self_center, align_self_flex_start, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_0, border_radius_1, border_radius_4, border_radius_pill, clr_primary, flex_1, flex_column, flex_row, fs_large, fs_normal, fs_semi_large, fw_500, fw_600, fw_bold, h_100, justify_center, mb_10, mb_20, mb_25, mb_5, ml_10, mr_10, mr_5, mt_0, mt_10, mt_20, mt_25, mt_5, mx_10, my_10, my_20, m_10, m_15, m_20, overflow_hidden, pb_10, pb_25, pl_10, pl_20, position_absolute, position_center, pt_15, pt_20, pt_25, px_10, px_15, px_20, py_10, py_15, py_20, p_10, p_20, Style, text_white, w_100, w_75, p_15 } from '../../../../stylesheets/primary-styles'
 import { LocationSelector } from './HomeTab'
 import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react'
 import { Shadow } from 'react-native-shadow-2'
@@ -18,6 +18,7 @@ import Validator from '../../../../utils/Validator'
 import { ImageUploadService } from '../../../../services/ImageUploadService'
 import { DeliveryService } from '../../../../services/DeliveryService'
 import { APIService } from '../../../../services/APIService'
+import { useNavigation, useRoute } from '@react-navigation/native'
 
 const BOX_SHADOW_COLOR = '#6c757d26'
 
@@ -29,7 +30,9 @@ interface AddDeliveryDetailsProps {
 type Promotion = GraphQLService.Type.Promotion
 const PICKUP_TYPES = ['Pick up right now', 'Pick up within 6 hours']
 
-export default function AddDeliveryDetails({ route, navigation }, props: AddDeliveryDetailsProps) {
+export default function AddDeliveryDetails(props: AddDeliveryDetailsProps) {
+    const navigation = useNavigation()
+    const route = useRoute()
     //StatusBar.setBackgroundColor('')
     const locationSelectorRef = useRef({})
     const [tabIndex, setTabIndex] = useState(0);
@@ -128,9 +131,13 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
                                     DeliveryService.User
                                         .uploadDeliveryPackage(
                                             deliveryPackage,
-                                            () => ToastAndroid.show('uploaded', ToastAndroid.LONG),
+                                            (_packageId) => {
+                                                ToastAndroid.show('Uploaded', ToastAndroid.LONG)
+                                                navigation.goBack()
+                                                navigation.navigate('ActiveActivity' as never, { packageId: _packageId } as never)
+                                            },
                                             (error) => {
-                                                ToastAndroid.show('upload failed', ToastAndroid.LONG)
+                                                ToastAndroid.show('Upload Failed', ToastAndroid.LONG)
                                                 console.log("------ upload error: ", { ...error })
                                             },
                                         )
@@ -149,8 +156,6 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
         photoUri.current = undefined
         refresh()
     }
-
-
 
     useEffect(() => {
         locationSelectorRef.current?.refresh?.()
@@ -192,6 +197,7 @@ export default function AddDeliveryDetails({ route, navigation }, props: AddDeli
         DeviceEventEmitter.emit('event.homeLocationSelectorRefresh')
         navigation.goBack()
     }
+
 
     return (
         <View style={styles.rootContainer}>

@@ -41,6 +41,17 @@ import ProfileEditor from './src/screens/MainScreen/Common/Profile/ProfileEditor
 import TestScreen from './src/screens/MainScreen/Common/Profile/TestScreen';
 import ChatScreen from './src/screens/MainScreen/Common/Chat/ChatScreen';
 import PhotoPreviewer from './src/screens/MainScreen/Shipper/HomeTab/PhotoPreviewer';
+import SendbirdChat, { GroupChannelCreateScreen, GroupChannelScreen, GroupChannelListScreen } from './src/screens/MainScreen/Common/Chat/SendbirdChatScreen';
+import { GroupChannel } from '@sendbird/chat/groupChannel';
+
+import { SendbirdUIKitContainer, useConnection } from '@sendbird/uikit-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ClipboardService, FileService, NotificationService, MediaService } from './SendbirdSDK/Services'
+import ActiveActivity from './src/screens/MainScreen/Common/Acitivity/ActiveActivity';
+import Reports from './src/screens/MainScreen/Common/Acitivity/Reports';
+import WalletScreen from './src/screens/MainScreen/Shipper/ProfileTab/WalletScreen';
+import WalletSend from './src/screens/MainScreen/Shipper/ProfileTab/WalletSend';
+import Widthdraw from './src/screens/MainScreen/Shipper/ProfileTab/Widthdraw';
 
 // ----------------------------------------------
 
@@ -80,6 +91,13 @@ const MainScreen = () => {
                 animation: 'slide_from_right',
               }}
             />
+            <Stack.Screen
+              name='ActiveActivity'
+              component={ActiveActivity}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
           </>
           : null
       }
@@ -107,8 +125,37 @@ const MainScreen = () => {
                 animation: 'slide_from_right',
               }}
             />
+            <Stack.Screen
+              name='WalletScreen'
+              component={WalletScreen}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='WalletSend'
+              component={WalletSend}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='Widthdraw'
+              component={Widthdraw}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
           </> : null
       }
+
+      <Stack.Screen
+        name='Reports'
+        component={Reports}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
 
       <Stack.Screen
         name='ProfileEditor'
@@ -131,6 +178,36 @@ const MainScreen = () => {
           animation: 'slide_from_bottom',
         }}
       />
+      {/* ------------------ Test ------------------ */}
+      <Stack.Screen
+        name='SendbirdChat'
+        component={SendbirdChat}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name='GroupChannelList'
+        component={GroupChannelListScreen}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name='GroupChannelCreate'
+        component={GroupChannelCreateScreen}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <Stack.Screen
+        name='GroupChannel'
+        component={GroupChannelScreen}
+        options={{
+          animation: 'slide_from_bottom',
+        }}
+      />
+      {/* ------------------ Test ------------------ */}
       <Stack.Screen
         name='TestScreen'
         component={TestScreen}
@@ -244,23 +321,39 @@ const App = () => {
         headers={{ names: '12332' }}
         subscribeHeaders={{ names: '12332' }}
       />
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{ headerShown: false }}
-        >
-          {
-            (!isAuthenticated) ?
-              <Stack.Screen
-                name='authenticationScreen'
-                component={Authentication}
-              />
-              :
-              <Stack.Screen
-                name='mainScreen'
-                component={MainScreen} />
-          }
-        </Stack.Navigator>
-      </NavigationContainer>
+      <SendbirdUIKitContainer
+        appId={'7A08D36B-7936-4201-9600-FD47D45BECE1'}
+        chatOptions={{ localCacheStorage: AsyncStorage }}
+        platformServices={{
+          file: FileService,
+          notification: NotificationService,
+          clipboard: ClipboardService,
+          media: MediaService,
+        }}
+        userProfile={{
+          onCreateChannel(channel) {
+
+          },
+        }}
+      >
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{ headerShown: false }}
+          >
+            {
+              (!isAuthenticated) ?
+                <Stack.Screen
+                  name='authenticationScreen'
+                  component={Authentication}
+                />
+                :
+                <Stack.Screen
+                  name='mainScreen'
+                  component={MainScreen} />
+            }
+          </Stack.Navigator>
+        </NavigationContainer>
+      </SendbirdUIKitContainer>
     </>
   );
 };

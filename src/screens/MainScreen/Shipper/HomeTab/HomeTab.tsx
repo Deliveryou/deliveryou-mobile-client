@@ -35,6 +35,19 @@ export default function HomeTab(props: HomeTabProps) {
             }, 500)
         })
 
+        DeviceEventEmitter.addListener('event.ShipperHomeTab.onDeliveryFinishedOrCanceled', () => {
+            // console.log('------ called: ', resultMatchedDialogVisible)
+            currentDeliveryPackage.current = undefined
+            setActiveDelivery(false)
+        })
+
+        DeviceEventEmitter.addListener('event.ShipperHomeTab.onDeliveryPickedUp', () => {
+            // console.log('------ called: ', resultMatchedDialogVisible)
+            if (currentDeliveryPackage.current) {
+                currentDeliveryPackage.current.status = { id: 4, name: 'DELIVERING' }
+            }
+        })
+
         DeliveryService.Shipper.getActivePackage(
             (deliveryPackage) => {
                 if (deliveryPackage) {
@@ -42,8 +55,11 @@ export default function HomeTab(props: HomeTabProps) {
                     setActiveDelivery(true)
                 }
             },
-            () => ToastAndroid.show('Cannot contact server', ToastAndroid.LONG)
+            (error) => {
+                ToastAndroid.show('Cannot contact server', ToastAndroid.LONG)
+            }
         )
+
     }, [])
 
 

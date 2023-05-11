@@ -1,6 +1,6 @@
 import { View, ScrollView, ImageBackground, SafeAreaView, StatusBar, DeviceEventEmitter, StyleSheet, Dimensions, Pressable, ToastAndroid, Alert } from 'react-native';
 import React, { useState, useEffect, useMemo, useRef } from 'react'
-import { align_items_center, align_self_center, bg_danger, bg_dark, bg_primary, bg_transparent, Style, bg_white, border_radius_pill, flex_1, fs_normal, fw_bold, h_100, justify_center, mt_10, mt_15, my_15, overflow_hidden, position_center, position_relative, px_10, p_0, p_10, resize_center, size_fill, text_white, w_100 } from '../../stylesheets/primary-styles';
+import { align_items_center, align_self_center, bg_danger, bg_dark, bg_primary, bg_transparent, Style, bg_white, border_radius_pill, flex_1, fs_normal, fw_bold, h_100, justify_center, mt_10, mt_15, my_15, overflow_hidden, position_center, position_relative, px_10, p_0, p_10, resize_center, size_fill, text_white, w_100, mt_20, flex_row, mx_10, py_10, px_20 } from '../../stylesheets/primary-styles';
 import { mergeStyles } from '../../utils/style-helpers';
 import { Tab, Text, TabView, Button, Divider, Dialog, Image } from '@rneui/themed';
 import { BlurView } from '@react-native-community/blur';
@@ -132,7 +132,7 @@ function SignUp() {
         <>
             <InputField
                 containerStyle={[mt_15]}
-                placeholder='Phone number'
+                placeholder='First name'
                 returnKeyType='next'
                 onSubmitEditing={() => {
                     passwordInput.current.focus?.()
@@ -140,6 +140,23 @@ function SignUp() {
                 blurOnSubmit={false}
                 onChangeText={(text) => phoneValue.current = text}
             />
+            <InputField
+                containerStyle={[mt_15]}
+                placeholder='Last name'
+                returnKeyType='next'
+                onSubmitEditing={() => {
+                    passwordInput.current.focus?.()
+                }}
+                blurOnSubmit={false}
+                onChangeText={(text) => phoneValue.current = text}
+            />
+            <View style={[flex_row, align_items_center, justify_center]}>
+                <Button
+                    containerStyle={mt_20}
+                    title={"Continue"}
+                    buttonStyle={[border_radius_pill, px_20, py_10]}
+                />
+            </View>
         </>
     )
 }

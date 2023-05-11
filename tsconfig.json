@@ -4,7 +4,9 @@
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
     /* Completeness */
-    "skipLibCheck": true /* Skip type checking all .d.ts files. */
+    "skipLibCheck": true, /* Skip type checking all .d.ts files. */
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
   "include": [
     "decs.d.ts"

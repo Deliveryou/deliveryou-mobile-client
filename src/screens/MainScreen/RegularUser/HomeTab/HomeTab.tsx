@@ -1,6 +1,6 @@
 import { View, StyleSheet, DeviceEventEmitter, ImageBackground, BackHandler, StatusBar, Image, Dimensions, ScrollView, TextInput, Pressable, StyleProp, ViewStyle, Modal, ToastAndroid, Alert } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react'
-import { align_items_center, align_self_flex_start, bg_black, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_1, border_radius_2, border_radius_4, border_radius_pill, clr_white, flex_1, flex_7, flex_column, flex_row, fs_semi_large, fw_400, fw_600, fw_700, fw_800, h_100, h_50, justify_center, left_0, mb_10, mb_15, mr_10, mt_10, mt_15, mt_20, position_absolute, p_5, right_0, Style, top_0, w_100 } from '../../../../stylesheets/primary-styles';
+import { align_items_center, align_self_flex_start, bg_black, bg_danger, bg_dark, bg_primary, bg_transparent, bg_warning, bg_white, border_radius_1, border_radius_2, border_radius_4, border_radius_pill, clr_white, flex_1, flex_7, flex_column, flex_row, fs_semi_large, fw_400, fw_600, fw_700, fw_800, h_100, h_50, justify_center, left_0, mb_10, mb_15, mr_10, mt_10, mt_15, mt_20, position_absolute, p_5, right_0, Style, top_0, w_100, overflow_hidden } from '../../../../stylesheets/primary-styles';
 import { Icon, Text, Button } from '@rneui/themed';
 import { Global } from '../../../../Global';
 import { Shadow } from 'react-native-shadow-2';
@@ -239,22 +239,33 @@ export default function HomeTab(props: HomeTabProps) {
                             }
                         })}
                     />
-                    <View>
+                    <View style={[mt_20]}>
                         <ScrollView
-                            style={bg_primary}
                             horizontal
+                            showsHorizontalScrollIndicator
                         // onResponderStart={() => props.overideParentTabSwipe?.(true)}
                         // onResponderEnd={() => props.overideParentTabSwipe?.(false)}
                         >
-                            <View style={[Style.dimen(100, 100), bg_dark, mr_10]} />
-                            <View style={[Style.dimen(100, 100), bg_dark, mr_10]} />
-                            <View style={[Style.dimen(100, 100), bg_dark, mr_10]} />
-                            <View style={[Style.dimen(100, 100), bg_dark, mr_10]} />
-                            <View style={[Style.dimen(100, 100), bg_dark, mr_10]} />
-                            <View style={[Style.dimen(100, 100), bg_dark, mr_10]} />
+                            <View style={[Style.dimen(120, 120), bg_dark, mr_10]}>
+                                <Image
+                                    source={{ uri: 'https://media.istockphoto.com/id/606682336/vi/vec-to/b%C3%A1n-m%E1%BA%ABu-banner-gi%E1%BA%A3m-gi%C3%A1-30.jpg?s=612x612&w=0&k=20&c=iq2eJ_mN8tKUNqzJXVWTNlh4_PI9ae1khz9X--p7GXY=' }}
+                                    style={Style.dimen(120, 120)}
+                                />
+                            </View>
+                            <View style={[Style.dimen(120, 120), bg_dark, mr_10]}>
+                                <Image
+                                    source={{ uri: 'https://goacademy.vn/wp-content/uploads/2022/08/Thanh-To%C3%A1n-V%C3%AD-Momo-1200x770-01.jpg' }}
+                                    style={Style.dimen(120, 120)}
+                                />
+                            </View>
+                            <View style={[Style.dimen(120, 120), bg_dark, mr_10]}>
+                                <Image
+                                    source={{ uri: `https://foto.kontan.co.id/3Py2c_Lz2KOsgQY0Lu_e-ymCPn0=/smart/filters:format(webp)/2022/11/28/1385766954p.jpg` }}
+                                    style={Style.dimen(120, 120)}
+                                />
+                            </View>
                         </ScrollView>
                     </View>
-                    <Button title={'dfkgnl'} onPress={() => openLocationPicker(props.navigation)} />
                 </View>
             </ScrollView>
 

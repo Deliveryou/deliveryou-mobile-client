@@ -11,7 +11,7 @@ import { GraphQLService } from '../../../../services/GraphQLService'
 import { ChatService, ChatServiceTypes } from '../../../../services/ChatService'
 import { throttleFunc } from '../../../../utils/ultilities'
 import { WebSocketService } from '../../../../services/WebsocketService'
-import { instanceOf } from 'prop-types'
+import SDK from '../../../../../MirrorflySDK/SDK'
 
 type DocumentData = FirebaseFirestoreTypes.DocumentData
 

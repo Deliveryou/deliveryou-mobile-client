@@ -6,11 +6,15 @@ import { align_items_center, align_self_center, bg_black, bg_danger, bg_primary,
 import { Shadow } from 'react-native-shadow-2'
 import { GraphQLService } from '../../../../services/GraphQLService'
 import { Global } from '../../../../Global'
+import { WalletService } from '../../../../services/WalletService'
+import { useNavigation } from '@react-navigation/native'
 
-export default function ProfileTab({ route, navigation }) {
+export default function ProfileTab() {
+    const navigation = useNavigation()
     const failedLogoutAttempt = useRef(0)
     const currentUser = useRef<GraphQLService.Type.User>();
     const [_refresh, setRefresh] = useState(0)
+    const [wallet, setWallet] = useState<GraphQLService.Type.Wallet>()
 
     const refresh = () => setRefresh(value => value + 1)
 
@@ -19,7 +23,20 @@ export default function ProfileTab({ route, navigation }) {
         console.log('------ started to get user')
         // waiting for apollo client to be set before using graphql
         setTimeout(getUser, 650)
+
+        DeviceEventEmitter.addListener('event.Wallet.onChanged', getWalletInfo)
+
+        getWalletInfo()
+
     }, [])
+
+    function getWalletInfo() {
+        // get wallet
+        WalletService.Common.getWalletInfo(
+            (wallet) => setWallet(wallet),
+            (error) => console.log(')))))))))))))) failed: ', error)
+        )
+    }
 
     function getUser() {
         const u = GraphQLService.Schema.User
@@ -50,6 +67,12 @@ export default function ProfileTab({ route, navigation }) {
                 }
             ]
         )
+    }
+
+    function openWallet() {
+        if (wallet?.id) {
+            navigation.navigate('WalletScreen' as never, { walletId: wallet.id } as never)
+        }
     }
 
     function logout() {
@@ -100,16 +123,16 @@ export default function ProfileTab({ route, navigation }) {
                     <Shadow style={[w_100, Style.borderRadius(20), bg_white]}>
                         <View style={[Style.dimen(4, '18%'), Style.backgroundColor('#d9d9d9'), align_self_center, mt_10, border_radius_pill]} />
                         <View style={[flex_row, py_10, px_15]}>
-                            <TouchableNativeFeedback>
+                            <TouchableNativeFeedback onPress={openWallet}>
                                 <View style={[align_items_center, justify_center, px_10, py_20, flex_1]}>
-                                    <Text style={[Style.fontSize(18), mb_5, fw_bold, Style.textColor('#38b000')]}>$12</Text>
+                                    <Text style={[Style.fontSize(18), mb_5, fw_bold, Style.textColor('#38b000')]}>{(wallet) ? wallet.credit : 0} credits</Text>
                                     <Text style={Style.textColor('#031261')}>Wallet</Text>
                                 </View>
                             </TouchableNativeFeedback>
                             <View style={[Style.dimen('88%', 1.5), Style.backgroundColor('#ced4da'), align_self_center]} />
                             <TouchableNativeFeedback>
                                 <View style={[align_items_center, justify_center, px_10, py_20, flex_1]}>
-                                    <Text style={[Style.fontSize(18), mb_5, fw_bold, Style.textColor('#38b000')]}>$12</Text>
+                                    <Text style={[Style.fontSize(18), mb_5, fw_bold, Style.textColor('#38b000')]}>1</Text>
                                     <Text style={Style.textColor('#031261')}>Delivered</Text>
                                 </View>
                             </TouchableNativeFeedback>

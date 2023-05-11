@@ -26,12 +26,10 @@ export namespace GraphQLService {
         }
 
         export type ChatSession = {
-            id: string
-            // user: User
-            // shipper: User
-            deliveryPackage: DeliveryPackage
-            active: boolean,
-            createdDate: string
+            user: User
+            shipper: User
+            channelUrl: string
+            firstCreated: string
         }
 
         export type PackageType = {
@@ -61,7 +59,22 @@ export namespace GraphQLService {
             recipientPhone: string
             note?: string
             packageType: PackageType
-            creationDate: string
+            creationDate: string,
+            status: PackageDeliveryStatus
+        }
+
+        export type PackageDeliveryStatus = {
+            id: number,
+            name: string
+        }
+
+        export type Wallet = {
+            id: number
+            shipper: User
+            credit: number
+            accountNumber?: string
+            accountOwner?: string
+            branch?: string
         }
     }
 
@@ -69,7 +82,6 @@ export namespace GraphQLService {
         export enum Query {
             userById = 'userById',
             applicablePromotion = 'applicablePromotion',
-            allChatSessions = 'allChatSessions',
             chatSession = 'chatSession'
         }
 
@@ -94,12 +106,10 @@ export namespace GraphQLService {
         }
 
         export enum ChatSession {
-            id = 'id',
-            // user = 'user',
-            // shipper = 'shipper',
-            deliveryPackage = 'deliveryPackage',
-            active = 'active',
-            createdDate = 'createdDate'
+            user = 'user',
+            shipper = 'shipper',
+            channelUrl = 'channelUrl',
+            firstCreated = 'firstCreated'
         }
 
         export enum PackageType {
@@ -195,22 +205,11 @@ export namespace GraphQLService {
         ))
     }
 
-    function allChatSessions(userId: number, fieldsToFetch: Schema.ChatSession[]) {
-        const query = buildQuery(
-            {
-                queryName: Schema.Query.allChatSessions,
-                params: [{ paramName: 'userId', paramValue: userId }]
-            },
-            fieldsToFetch
-        )
-        return getGlobalClient().query(query)
-    }
-
-    function chatSession(packageId: number, fieldsToFetch: Schema.ChatSession[]) {
+    function chatSession(userId: number, shipperId: number, fieldsToFetch: Schema.ChatSession[]) {
         const query = buildQuery(
             {
                 queryName: Schema.Query.chatSession,
-                params: [{ paramName: 'packageId', paramValue: packageId }]
+                params: [{ paramName: 'userId', paramValue: userId }, { paramName: 'shipperId', paramValue: shipperId }]
             },
             fieldsToFetch
         )
@@ -335,40 +334,23 @@ export namespace GraphQLService {
             .catch(error => onGetFailure?.(error))
     }
 
-    export function getAllChatSessions(onGetSuccess?: (chatSessions: Type.ChatSession[]) => void, onGetFailure?: (error: any) => void) {
+
+    export function getChatSession(userId: number, shipperId: number, onGetSuccess?: (promotion: Type.ChatSession) => void, onGetFailure?: (error: any) => void) {
         const c = Schema.ChatSession
-        const dp = Schema.DeliveryPackage
         const u = Schema.User
-
-        allChatSessions(Global.User.CurrentUser.id,
+        chatSession(
+            userId,
+            shipperId,
             [
-                c.id,
-                c.active,
-                c.createdDate,
-                `${c.deliveryPackage} {
-                    ${dp.id}
-                    ${dp.user} {
-                        ${u.id}
-                        ${u.firstName}
-                        ${u.lastName}
-                        ${u.profilePictureUrl}
-                    }
-                    ${dp.shipper} {
-                        ${u.id}
-                        ${u.firstName}
-                        ${u.lastName}
-                        ${u.profilePictureUrl}
-                    }
-                }` as Schema.ChatSession
-            ])
-            .then(result => onGetSuccess?.(result.data[Schema.Query.allChatSessions] as Type.ChatSession[]))
-            .catch(error => onGetFailure?.(error))
-    }
-
-    export function getChatSession(packageId: number, onGetSuccess?: (chatSession: Type.ChatSession) => void, onGetFailure?: (error: any) => void) {
-        const c = Schema.ChatSession
-        chatSession(packageId, [c.id, c.active, c.createdDate])
-            .then(result => onGetSuccess?.(result.data[Schema.Query.chatSession] as Type.ChatSession))
+                `${c.user} {
+                    ${u.id}
+                }` as Schema.ChatSession,
+                `${c.shipper} {
+                    ${u.id}
+                }` as Schema.ChatSession,
+                c.channelUrl
+            ]
+        ).then(result => onGetSuccess?.(result.data[Schema.Query.chatSession] as Type.ChatSession))
             .catch(error => onGetFailure?.(error))
     }
 
