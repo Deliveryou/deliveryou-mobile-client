@@ -48,10 +48,13 @@ import { SendbirdUIKitContainer, useConnection } from '@sendbird/uikit-react-nat
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ClipboardService, FileService, NotificationService, MediaService } from './SendbirdSDK/Services'
 import ActiveActivity from './src/screens/MainScreen/Common/Acitivity/ActiveActivity';
-import Reports from './src/screens/MainScreen/Common/Acitivity/Reports';
+import UserReports from './src/screens/MainScreen/Common/Acitivity/UserReports';
+import ShipperReports from './src/screens/MainScreen/Common/Acitivity/ShipperReports';
 import WalletScreen from './src/screens/MainScreen/Shipper/ProfileTab/WalletScreen';
 import WalletSend from './src/screens/MainScreen/Shipper/ProfileTab/WalletSend';
 import Widthdraw from './src/screens/MainScreen/Shipper/ProfileTab/Widthdraw';
+import WalletHistory from './src/screens/MainScreen/Shipper/ProfileTab/WalletHistory';
+import RegisterScreen from './src/screens/AuthenticationScreen/RegisterScreen';
 
 // ----------------------------------------------
 
@@ -94,6 +97,13 @@ const MainScreen = () => {
             <Stack.Screen
               name='ActiveActivity'
               component={ActiveActivity}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='UserReports'
+              component={UserReports}
               options={{
                 animation: 'slide_from_right',
               }}
@@ -146,16 +156,24 @@ const MainScreen = () => {
                 animation: 'slide_from_right',
               }}
             />
+            <Stack.Screen
+              name='WalletHistory'
+              component={WalletHistory}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='ShipperReports'
+              component={ShipperReports}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
           </> : null
       }
 
-      <Stack.Screen
-        name='Reports'
-        component={Reports}
-        options={{
-          animation: 'slide_from_right',
-        }}
-      />
+
 
       <Stack.Screen
         name='ProfileEditor'
@@ -342,10 +360,24 @@ const App = () => {
           >
             {
               (!isAuthenticated) ?
-                <Stack.Screen
-                  name='authenticationScreen'
-                  component={Authentication}
-                />
+                <>
+                  <Stack.Screen
+                    name='authenticationScreen'
+                    component={Authentication}
+                  />
+                  <Stack.Screen
+                    name='RegisterScreen'
+                    component={RegisterScreen}
+                    options={{ animation: 'slide_from_bottom' }}
+                  />
+                  <Stack.Screen
+                    name='CameraScreen'
+                    component={CameraScreen}
+                    options={{
+                      animation: 'slide_from_right',
+                    }}
+                  />
+                </>
                 :
                 <Stack.Screen
                   name='mainScreen'

@@ -19,6 +19,20 @@ export namespace WalletService {
                 .catch(error => onError?.(error))
         }
 
+        export function getPendingWithdraw(walletId: number, onSuccess: (withdraw: GraphQLService.Type.Withdraw) => void, onError?: (error: any) => void) {
+            APIService.axios(`/api/wallet/shared/get-withdraw-request/${walletId}`)
+                .then(response => response.data as GraphQLService.Type.Withdraw)
+                .then(data => onSuccess(data))
+                .catch(error => onError?.(error))
+        }
+
+        export function getHistory(walletId: number, onSuccess: (list: GraphQLService.Type.TransactionHistory[]) => void, onError?: (error: any) => void) {
+            APIService.axios(`/api/wallet/shared/transaction-history-by-wallet-id/${walletId}`)
+                .then(response => response.data as GraphQLService.Type.TransactionHistory[])
+                .then(data => onSuccess(data))
+                .catch(error => onError?.(error))
+        }
+
     }
 
     export namespace Shipper {
@@ -44,6 +58,17 @@ export namespace WalletService {
             }
             APIService.axios('/api/wallet/shipper/set-account-info', 'post', uploadObj)
                 .then(response => response.data as GraphQLService.Type.Wallet)
+                .then(data => onSuccess(data))
+                .catch(error => onError?.(error))
+        }
+
+        export function createWithdrawRequest(walletId: number, widthdrawCredits: string, onSuccess: (withdraw: GraphQLService.Type.Withdraw) => void, onError?: (error: any) => void) {
+            const uploadObj = {
+                walletId,
+                widthdrawCredits
+            }
+            APIService.axios('/api/wallet/shipper/withdraw-request', 'post', uploadObj)
+                .then(response => response.data as GraphQLService.Type.Withdraw)
                 .then(data => onSuccess(data))
                 .catch(error => onError?.(error))
         }

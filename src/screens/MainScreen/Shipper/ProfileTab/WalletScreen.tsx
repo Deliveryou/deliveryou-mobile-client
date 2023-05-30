@@ -44,6 +44,10 @@ export default function WalletScreen() {
         navigation.navigate('Widthdraw' as never, { wallet } as never)
     }
 
+    function openWalletHistory() {
+        navigation.navigate('WalletHistory' as never, { wallet } as never)
+    }
+
     return (
         <ScrollView style={styles.root}>
             <View style={[py_10, px_15]}>
@@ -110,6 +114,7 @@ export default function WalletScreen() {
                     title='History'
                     containerStyle={mr_20}
                     buttonStyle={buttonSize}
+                    onPress={openWalletHistory}
                 >
                     <Icon name='history' type='material-community' color={'#fff'} />
                 </FunctionalButton>

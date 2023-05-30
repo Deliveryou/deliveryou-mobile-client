@@ -2,7 +2,7 @@ import { View, Text, ToastAndroid, StyleSheet, StatusBar, TextInput, ScrollView,
 import React, { useEffect, useRef, useState } from 'react'
 import { GraphQLService } from '../../../../services/GraphQLService'
 import { Shadow } from 'react-native-shadow-2'
-import { Style, align_items_center, bg_black, bg_white, flex_1, flex_row, fw_600, fw_bold, justify_center, justify_space_around, m_20, mb_20, mr_15, mt_10, mt_15, mt_20, mt_5, mx_10, mx_20, my_10, my_15, my_20, p_10, p_15, p_20, p_25, p_5, px_10, px_15, px_20, px_25, py_10, py_15, py_20, w_100 } from '../../../../stylesheets/primary-styles'
+import { Style, align_items_center, bg_black, bg_white, border_radius_pill, flex_1, flex_row, fw_600, fw_bold, justify_center, justify_space_around, m_20, mb_20, mr_10, mr_15, mt_10, mt_15, mt_20, mt_5, mx_10, mx_20, my_10, my_15, my_20, p_10, p_15, p_20, p_25, p_5, pl_10, pl_20, px_10, px_15, px_20, px_25, py_10, py_15, py_20, py_5, text_white, w_100 } from '../../../../stylesheets/primary-styles'
 import { Avatar, Button, Icon, ListItem } from '@rneui/themed'
 import { WalletService } from '../../../../services/WalletService'
 import { useNavigation, useRoute } from '@react-navigation/native'
@@ -30,6 +30,7 @@ const bankList = napas_banks.banksnapas
 export default function Widthdraw() {
     const navigation = useNavigation()
     const [wallet, setWallet] = useState<GraphQLService.Type.Wallet>()
+    const [widthdraw, setWithdraw] = useState<GraphQLService.Type.Withdraw>()
 
     const [modalVisible, setModalVisible] = useState(false)
     const [bankInfoNotSet, setBankInfoNotSet] = useState(false)
@@ -39,6 +40,10 @@ export default function Widthdraw() {
 
 
     useEffect(() => {
+        const sbstack = StatusBar.pushStackEntry({
+            backgroundColor: '#fff'
+        })
+
         WalletService.Common.getWalletInfo(
             (wallet) => setWallet(wallet),
             (error) => {
@@ -46,12 +51,25 @@ export default function Widthdraw() {
                 navigation.goBack()
             }
         )
+
+        return () => {
+            StatusBar.popStackEntry(sbstack)
+        }
+
     }, [])
 
     useEffect(() => {
-        if (wallet && accountInfoNotSet()) {
-            setBankInfoNotSet(true)
-            setModalVisible(true)
+        if (wallet) {
+            if (accountInfoNotSet()) {
+                setBankInfoNotSet(true)
+                setModalVisible(true)
+            }
+            else
+                WalletService.Common.getPendingWithdraw(
+                    wallet.id,
+                    (_withdraw) => setWithdraw(_withdraw),
+                    (error) => ToastAndroid.show('Cannot retrieve your withdraws', ToastAndroid.LONG)
+                )
         }
     }, [wallet])
 
@@ -87,8 +105,26 @@ export default function Widthdraw() {
                 </>
             )
         }
-        return <Text style={[Style.fontSize(15), px_20, fw_600, Style.textColor('#f94144')]}>Error: Not a number</Text>
+        return <Text style={[Style.fontSize(15), fw_600, Style.textColor('#f94144')]}>Error: Not a number</Text>
     }
+
+    function createWithdrawRequest() {
+        if (widthdraw) {
+            ToastAndroid.show('You still have a pending request\nCannot proceed!', ToastAndroid.LONG)
+            return
+        }
+        if (wallet && widthdrawAmount !== '') {
+            WalletService.Shipper.createWithdrawRequest(
+                wallet.id,
+                widthdrawAmount,
+                (_withdraw) => setWithdraw(_withdraw),
+                (error) => ToastAndroid.show('Cannot create withdraw request:\nserver timeout ', ToastAndroid.LONG)
+            )
+        } else
+            ToastAndroid.show('Cannot create withdraw request', ToastAndroid.LONG)
+    }
+
+    const withdrawDate = (widthdraw?.date) ? new Date(Date.parse(widthdraw.date)) : undefined
 
     return (
         <>
@@ -113,7 +149,7 @@ export default function Widthdraw() {
                 </View>
 
                 <Text style={[Style.fontSize(20), fw_600, mt_10, mb_20, , mx_20, Style.textColor('#463f3a')]}>
-                    Widthdraw
+                    Withdraw
                 </Text>
 
                 {/* --------------------- MAIN ------------------------ */}
@@ -148,16 +184,56 @@ export default function Widthdraw() {
                             (canCreateRequest.current) ?
                                 <Button
                                     containerStyle={[mt_15]}
-                                    title={'Create Widthdraw Request'}
+                                    title={'Create Withdraw Request'}
                                     buttonStyle={[{ paddingVertical: 12 }, Style.borderRadius(100)]}
                                     color={'#2087d933'}
                                     titleStyle={Style.textColor('#2087d9')}
+                                    onPress={createWithdrawRequest}
                                 />
                                 : null
                         }
 
                     </View>
                 </Shadow>
+
+                <Text style={[Style.fontSize(20), fw_600, mt_10, mb_20, , mx_20, Style.textColor('#463f3a')]}>
+                    Withdraw request
+                </Text>
+
+                <Shadow containerStyle={[mx_20, mt_10, mb_20]} style={w_100} startColor='#ced4dacc' distance={8}>
+                    <View style={[Style.borderRadius(10), p_20]}>
+                        {
+                            (widthdraw) ?
+                                <View>
+                                    <View style={[Style.backgroundColor('#ee6055'), px_15, py_5, border_radius_pill]}>
+                                        <Text style={[Style.fontSize(15), fw_600, text_white]}>CURRENT REQUEST:</Text>
+                                    </View>
+                                    <View style={pl_20}>
+                                        <View style={[flex_row, mt_15]}>
+                                            <Text style={[Style.fontSize(15), fw_600, mr_10]}>Date:</Text>
+                                            <Text>{withdrawDate?.toUTCString()}</Text>
+                                        </View>
+                                        <View style={flex_row}>
+                                            <Text style={[Style.fontSize(15), fw_600, mr_10]}>Amount:</Text>
+                                            <Text>{widthdraw?.amount} credits</Text>
+                                        </View>
+                                        <View style={flex_row}>
+                                            <Text style={[Style.fontSize(15), fw_600, mr_10]}>Status:</Text>
+                                            <Text style={[Style.fontSize(15), fw_600, Style.textColor('#ee6055')]}>PENDING</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                :
+                                <View style={flex_row}>
+                                    <View style={[Style.backgroundColor('#ee6055'), px_15, py_5, border_radius_pill]}>
+                                        <Text style={[Style.fontSize(15), fw_600, text_white]}>NO PENDING REQUEST</Text>
+                                    </View>
+                                </View>
+                        }
+                    </View>
+                </Shadow>
+
+                <View style={Style.dimen(100, '100%')} />
 
             </ScrollView>
 

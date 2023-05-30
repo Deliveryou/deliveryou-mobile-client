@@ -83,6 +83,11 @@ export default function ActivityTab() {
         })
     }, [])
 
+    function openReports() {
+        const screen = ((Global.User.CurrentUser.isShipper()) ? 'ShipperReports' : 'UserReports') as never
+        navigation.navigate(screen)
+    }
+
     function loadPackages(setNewList: boolean = true) {
         DeliveryService.Common.packageHistory(
             indexes.current.start,
@@ -142,7 +147,7 @@ export default function ActivityTab() {
                         buttonStyle={[bg_transparent]}
                         titleStyle={{ fontSize: 14, color: '#000' }}
                         containerStyle={styles.headerContentItem}
-                        onPress={() => navigation.navigate('Reports' as never)}
+                        onPress={openReports}
                     >
                         <Icon style={mr_5} name='line-graph' type='entypo' />
                         Reports

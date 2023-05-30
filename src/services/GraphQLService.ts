@@ -76,6 +76,21 @@ export namespace GraphQLService {
             accountOwner?: string
             branch?: string
         }
+
+        export type Withdraw = {
+            id: number
+            amount: number
+            wallet: Wallet
+            date: string
+            validWithinDays: number
+        }
+
+        export type TransactionHistory = {
+            id: number
+            wallet: Wallet
+            amount: number
+            creationTime: string
+        }
     }
 
     export namespace Schema {

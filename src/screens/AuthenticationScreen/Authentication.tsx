@@ -11,6 +11,7 @@ import { AxiosError } from 'axios';
 import { Global } from '../../Global';
 import RNSecureKeyStore, { ACCESSIBLE } from "react-native-secure-key-store";
 import { AuthenticationService } from '../../services/AuthenticationService';
+import { useNavigation } from '@react-navigation/native'
 
 const prioritizer = new Prioritizer.FirstOnlyMode(100)
 
@@ -128,15 +129,18 @@ function LogIn() {
 }
 
 function SignUp() {
+    const navigation = useNavigation()
+
+    function openRegister() {
+        navigation.navigate('RegisterScreen' as never)
+    }
+
     return (
         <>
             <InputField
                 containerStyle={[mt_15]}
                 placeholder='First name'
                 returnKeyType='next'
-                onSubmitEditing={() => {
-                    passwordInput.current.focus?.()
-                }}
                 blurOnSubmit={false}
                 onChangeText={(text) => phoneValue.current = text}
             />
@@ -144,9 +148,6 @@ function SignUp() {
                 containerStyle={[mt_15]}
                 placeholder='Last name'
                 returnKeyType='next'
-                onSubmitEditing={() => {
-                    passwordInput.current.focus?.()
-                }}
                 blurOnSubmit={false}
                 onChangeText={(text) => phoneValue.current = text}
             />
@@ -155,6 +156,7 @@ function SignUp() {
                     containerStyle={mt_20}
                     title={"Continue"}
                     buttonStyle={[border_radius_pill, px_20, py_10]}
+                    onPress={openRegister}
                 />
             </View>
         </>
@@ -162,7 +164,8 @@ function SignUp() {
 }
 
 
-export default function Authentication({ navigation, route }, args: any) {
+export default function Authentication(args: any) {
+    const navigation = useNavigation()
 
     let { style, backgroundImageSource } = args
     const [reset, setReset] = useState(0)

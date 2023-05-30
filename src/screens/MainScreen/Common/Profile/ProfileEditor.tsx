@@ -468,15 +468,19 @@ function ChangePhoneNumber(props: ChangePhoneNumberProps) {
         // check if the new phone number is already used
         UserService.phoneExists(newPhone,
             (exists) => {
-                if (!exists)
+                if (!exists) {
+                    console.log('>>>>>>>> otp: can use this phone')
                     auth().signInWithPhoneNumber(newPhone)
                         .then(res => {
                             const toast = (otpConfirmation) ? 'SMS resent' : 'SMS sent!'
                             ToastAndroid.show(toast, ToastAndroid.LONG)
                             setOtpConfirmation(res)
                         })
-                        .catch(error => ToastAndroid.show('Failed to send sms!', ToastAndroid.LONG))
-                else {
+                        .catch(error => {
+                            console.log('>>> error sms: ', error)
+                            ToastAndroid.show('Failed to send sms!', ToastAndroid.LONG)
+                        })
+                } else {
                     newPhoneErrorMsg.current = 'This number already exists'
                     refresh()
                 }
