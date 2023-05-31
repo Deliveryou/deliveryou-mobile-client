@@ -21,6 +21,7 @@ export namespace GraphQLService {
             lastName: string,
             phone: string,
             citizenId?: string,
+            password?: string,
             profilePictureUrl?: string,
             dateOfBirth?: string
         }

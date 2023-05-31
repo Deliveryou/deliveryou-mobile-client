@@ -1,7 +1,8 @@
 import axios, { AxiosError } from "axios";
 import { APIService } from "./APIService";
 import RNSecureKeyStore, { ACCESSIBLE } from "react-native-secure-key-store";
-import { DeviceEventEmitter } from "react-native";
+import { Alert, DeviceEventEmitter, ToastAndroid } from "react-native";
+import { GraphQLService } from "./GraphQLService";
 
 export namespace AuthenticationService {
     export function login(phone: string, password: string, onLogInSuccessfully?: (response: LogInResponse) => void, onLogInFailure?: (error?: AxiosError | string) => void) {
@@ -133,5 +134,35 @@ export namespace AuthenticationService {
             .then(() => onLogOutSuccess?.())
             .catch((error) => onLogOutFailure?.(error))
         DeviceEventEmitter.emit('event.app.authenticationState', false)
+    }
+
+    export function register(user: GraphQLService.Type.User, onSuccess?: () => void, onError?: (error: any) => void) {
+        APIService.axios('/api/auth/register', 'post', user)
+            .then(response => response.data as LogInResponse)
+            .then(data => {
+                securelySaveCredential(
+                    data,
+                    () => {
+                        onSuccess?.()
+                        DeviceEventEmitter.emit('event.app.authenticationState', true)
+                    },
+                    (error) => {
+                        onError?.(error)
+                        Alert.alert('⚠️ Attention',
+                            'An error occured when saving for login information!\n\n' +
+                            'Your credential will be required when re-launched.',
+                            [{
+                                text: 'OK',
+                                onPress: () => {
+                                    DeviceEventEmitter.emit('event.app.authenticationState', true)
+                                }
+                            }])
+                    }
+                )
+            })
+            .catch(error => {
+                ToastAndroid.show('Failed to sign you in!', ToastAndroid.LONG)
+                onError?.(error)
+            })
     }
 }
