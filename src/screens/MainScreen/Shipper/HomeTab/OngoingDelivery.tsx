@@ -1,7 +1,7 @@
 import { StatusBar, StyleSheet, Text, ToastAndroid, View, Linking, Pressable, Dimensions, TouchableNativeFeedback, Alert, DeviceEventEmitter } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Avatar, Button, Divider, FAB, Icon, Tab, TabView } from '@rneui/themed'
-import { align_items_center, align_self_baseline, align_self_center, align_self_flex_start, bg_black, bg_danger, bg_dark, bg_primary, bg_warning, bg_white, border_radius_pill, clr_danger, flex_1, flex_column, flex_row, fs_large, fs_semi_large, fw_bold, justify_center, mb_10, mb_5, ml_10, ml_5, mr_10, mt_10, mx_15, mx_20, mx_25, my_10, my_15, m_0, m_10, overflow_hidden, pl_15, pl_20, pr_15, pr_20, pr_25, pt_0, pt_10, pt_5, px_10, px_15, px_25, px_5, py_10, py_15, py_5, p_0, p_15, p_20, p_25, Style, text_black, text_white, w_100, mt_5, p_5, mb_25, p_10, ml_20, ml_25, mt_20, mx_10 } from '../../../../stylesheets/primary-styles'
+import { align_items_center, align_self_baseline, align_self_center, align_self_flex_start, bg_black, bg_danger, bg_dark, bg_primary, bg_warning, bg_white, border_radius_pill, clr_danger, flex_1, flex_column, flex_row, fs_large, fs_semi_large, fw_bold, justify_center, mb_10, mb_5, ml_10, ml_5, mr_10, mt_10, mx_15, mx_20, mx_25, my_10, my_15, m_0, m_10, overflow_hidden, pl_15, pl_20, pr_15, pr_20, pr_25, pt_0, pt_10, pt_5, px_10, px_15, px_25, px_5, py_10, py_15, py_5, p_0, p_15, p_20, p_25, Style, text_black, text_white, w_100, mt_5, p_5, mb_25, p_10, ml_20, ml_25, mt_20, mx_10, m_15, my_25 } from '../../../../stylesheets/primary-styles'
 import SimpleHeaderNavigation from '../../../../components/SimpleHeaderNavigation'
 import { ScrollView } from 'react-native-gesture-handler'
 import Clipboard from '@react-native-clipboard/clipboard'
@@ -178,18 +178,30 @@ export default function OngoingDelivery({ route, navigation }) {
                 <InfoCards
                     deliveryPackage={deliveryPackage.current}
                 />
-                <View style={[flex_row, { marginLeft: 40 }, mt_20]}>
-                    <Text style={[Style.width(80), Style.fontSize(15), fw_bold]}>Price:</Text>
-                    <Text style={[flex_1, Style.fontSize(15)]}>{deliveryPackage.current?.price} VND</Text>
-                </View>
-                {
-                    (deliveryPackage.current?.promotion) ?
-                        <View style={[flex_row, { marginLeft: 40 }]}>
-                            <Text style={[Style.width(80), Style.fontSize(15), fw_bold]}>Discount:</Text>
-                            <Text style={[flex_1, Style.fontSize(15)]}>{deliveryPackage.current.promotion.discountPercentage * 100} %</Text>
+
+                <Shadow
+                    containerStyle={[my_25, mx_25]}
+                    style={[Style.borderRadius(10), p_20, w_100]}
+                >
+                    <View>
+                        <View style={[flex_row, align_items_center]}>
+                            <Text style={[Style.width(80), Style.fontSize(15), fw_bold]}>Price:</Text>
+                            <View>
+                                <Text style={[flex_1, Style.fontSize(15), Style.backgroundColor('#22577a'), py_5, px_10, border_radius_pill, text_white]}>{deliveryPackage.current?.price} VND</Text>
+                            </View>
                         </View>
-                        : null
-                }
+                        {
+                            (deliveryPackage.current?.promotion) ?
+                                <View style={[flex_row, align_items_center, mt_20]}>
+                                    <Text style={[Style.width(80), Style.fontSize(15), fw_bold]}>Discount:</Text>
+                                    <View>
+                                        <Text style={[flex_1, Style.fontSize(15), Style.backgroundColor('#22577a'), py_5, px_10, border_radius_pill, text_white]}>{deliveryPackage.current.promotion.discountPercentage * 100} %</Text>
+                                    </View>
+                                </View>
+                                : null
+                        }
+                    </View>
+                </Shadow>
             </ScrollView>
             <View style={[flex_row, align_items_center, justify_center, mb_10]}>
                 {

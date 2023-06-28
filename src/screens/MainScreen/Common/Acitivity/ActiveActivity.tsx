@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, StatusBar, ToastAndroid, TouchableNativeFeedback, ScrollView, BackHandler } from 'react-native'
+import { View, Text, StyleSheet, Image, StatusBar, ToastAndroid, TouchableNativeFeedback, ScrollView, BackHandler, DeviceEventEmitter, Linking } from 'react-native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Style, align_items_center, align_self_center, bg_primary, bg_white, border_radius_pill, flex_1, flex_row, fw_bold, h_100, justify_center, mb_10, mb_15, ml_10, mt_10, mt_15, mt_20, mt_25, mt_5, my_10, my_20, p_15, pl_15, pl_25, position_absolute, px_10, px_20, px_5, py_5, w_100 } from '../../../../stylesheets/primary-styles';
 import { Avatar, Button, FAB, Icon } from '@rneui/themed';
@@ -10,6 +10,7 @@ import { APIService } from '../../../../services/APIService';
 import { Global } from '../../../../Global';
 import { GraphQLService } from '../../../../services/GraphQLService';
 import { Shadow } from 'react-native-shadow-2';
+import { UserService } from '../../../../services/UserService';
 
 function sockTopic(topic: string) {
     return `/user/${Global.User.CurrentUser.id}/notification/package/${topic}`
@@ -22,6 +23,7 @@ export default function ActiveActivity() {
     const [deliveryPackage, setDeliveryPackage] = useState<GraphQLService.Type.DeliveryPackage>()
     const [chatUrl, setChatUrl] = useState<string>()
     const [_refresh, set_refresh] = useState(0)
+    const [canRateShipper, setOnCanRateShipper] = useState(false)
 
     const refresh = () => set_refresh(val => val + 1)
 
@@ -47,9 +49,15 @@ export default function ActiveActivity() {
                 DeliveryService.Common.getPackage(
                     packageId,
                     (deliveryPackage) => {
-                        if (deliveryPackage)
+                        if (deliveryPackage) {
                             setDeliveryPackage(deliveryPackage)
-                        else
+
+                            UserService.canRateShiper(
+                                deliveryPackage.id,
+                                () => setOnCanRateShipper(true)
+                            )
+
+                        } else
                             throw ''
                     },
                     (error) => {
@@ -65,6 +73,9 @@ export default function ActiveActivity() {
 
     useEffect(() => {
         getPackage()
+
+        DeviceEventEmitter.addListener('event.RateShipper.onRated', () => setOnCanRateShipper(false))
+
     }, [])
 
     useEffect(() => {
@@ -132,6 +143,19 @@ export default function ActiveActivity() {
         refresh()
     }
 
+    function cancelWaiting() {
+        if (deliveryPackage) {
+            DeliveryService.User.cancelWaiting(
+                deliveryPackage.id,
+                () => {
+                    ToastAndroid.show('Package has been canceled!', ToastAndroid.LONG)
+                    navigation.goBack()
+                },
+                () => ToastAndroid.show('Failed to cancel this package!', ToastAndroid.LONG)
+            )
+        }
+    }
+
     const titleWidth = 82
 
     function onSockMessage(message: string | object, topic: string) {
@@ -153,6 +177,33 @@ export default function ActiveActivity() {
             refresh()
         }
     }
+
+    function callForHelp() {
+        Linking.openURL(`tel:0851234567`)
+    }
+
+    const canRate = useMemo(() => {
+        if (deliveryPackage?.creationDate) {
+
+            const milis = Date.parse(deliveryPackage.creationDate)
+
+            if (isNaN(milis))
+                return false
+
+            const milisIn1Day = 86400000
+            console.log('>>>>>>> date: ', new Date(milis))
+            return (Date.now() - milis < milisIn1Day)
+        }
+        return false
+    }, [deliveryPackage?.creationDate])
+
+    function openRateDriver() {
+        if (deliveryPackage)
+            navigation.navigate('RateDriver' as never, {
+                package: deliveryPackage
+            } as never)
+    }
+
 
     return (
         <View style={styles.container}>
@@ -304,6 +355,7 @@ export default function ActiveActivity() {
                         :
                         <WaitingBtmSheet
                             onMatched={onMatched}
+                            onCancelWaiting={cancelWaiting}
                         />
                 }
             </ScrollView>
@@ -320,6 +372,31 @@ export default function ActiveActivity() {
                     :
                     null
             }
+            {
+                (deliveryPackage && ['finished', 'canceled'].includes(deliveryPackage.status.name.toLowerCase()) && canRate && canRateShipper) ?
+                    <FAB
+                        onPress={openRateDriver}
+                        placement="right"
+                        icon={{ name: 'star', color: 'white', type: 'font-awesome' }}
+                        color="#ff9f1c"
+                        title={"Rate driver"}
+                        containerStyle={{ marginBottom: 8, marginRight: 8 }}
+                    />
+                    :
+                    null
+            }
+            {
+                (deliveryPackage && ['canceled'].includes(deliveryPackage.status.name.toLowerCase())) ?
+                    <FAB
+                        onPress={callForHelp}
+                        placement="left"
+                        icon={{ name: 'call', color: '#fff', type: 'ionicons' }}
+                        color="#ef476f"
+                        title={"Call for help"}
+                        containerStyle={{ marginBottom: 8, marginRight: 8 }}
+                    />
+                    : null
+            }
         </View>
     )
 }
@@ -327,7 +404,8 @@ export default function ActiveActivity() {
 // -------------------------------------------
 
 function WaitingBtmSheet(props: {
-    onMatched: () => void
+    onMatched: () => void,
+    onCancelWaiting: () => void
 }) {
     const navigation = useNavigation()
     const [visible, setVisible] = useState(true)
@@ -377,6 +455,7 @@ function WaitingBtmSheet(props: {
                                             buttonStyle={border_radius_pill}
                                             color={'#ff246133'}
                                             titleStyle={Style.textColor('#ff513d')}
+                                            onPress={props.onCancelWaiting}
                                         />
                                         : null
                                 }

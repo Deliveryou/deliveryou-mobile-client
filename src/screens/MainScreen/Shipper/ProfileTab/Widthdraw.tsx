@@ -2,11 +2,13 @@ import { View, Text, ToastAndroid, StyleSheet, StatusBar, TextInput, ScrollView,
 import React, { useEffect, useRef, useState } from 'react'
 import { GraphQLService } from '../../../../services/GraphQLService'
 import { Shadow } from 'react-native-shadow-2'
-import { Style, align_items_center, bg_black, bg_white, border_radius_pill, flex_1, flex_row, fw_600, fw_bold, justify_center, justify_space_around, m_20, mb_20, mr_10, mr_15, mt_10, mt_15, mt_20, mt_5, mx_10, mx_20, my_10, my_15, my_20, p_10, p_15, p_20, p_25, p_5, pl_10, pl_20, px_10, px_15, px_20, px_25, py_10, py_15, py_20, py_5, text_white, w_100 } from '../../../../stylesheets/primary-styles'
+import { Style, align_items_center, bg_black, bg_white, border_radius_pill, flex_1, flex_row, fw_600, fw_bold, justify_center, justify_space_around, m_20, mb_20, ml_10, ml_20, mr_10, mr_15, mt_10, mt_15, mt_20, mt_5, mx_10, mx_20, my_10, my_15, my_20, p_10, p_15, p_20, p_25, p_5, pl_10, pl_15, pl_20, position_absolute, pr_25, px_10, px_15, px_20, px_25, py_10, py_15, py_20, py_5, right_0, text_white, w_100 } from '../../../../stylesheets/primary-styles'
 import { Avatar, Button, Icon, ListItem } from '@rneui/themed'
 import { WalletService } from '../../../../services/WalletService'
 import { useNavigation, useRoute } from '@react-navigation/native'
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import napas_banks from '../../../../resources/json/napas_banks.json'
+import Validator from '../../../../utils/Validator'
 
 type Bank = {
     en_name: string
@@ -33,6 +35,7 @@ export default function Widthdraw() {
     const [widthdraw, setWithdraw] = useState<GraphQLService.Type.Withdraw>()
 
     const [modalVisible, setModalVisible] = useState(false)
+    const [otpModalVisible, setOtpModalVisible] = useState(false)
     const [bankInfoNotSet, setBankInfoNotSet] = useState(false)
 
     const [widthdrawAmount, setWidthdrawAmount] = useState('100')
@@ -101,7 +104,7 @@ export default function Widthdraw() {
             return (
                 <>
                     <Text style={[Style.fontSize(15)]}>You'll be widthdrawing:  </Text>
-                    <Text style={[Style.fontSize(15), fw_600, Style.textColor('#ffa62b')]}>{(amount * 100) + ' VND'}</Text>
+                    <Text style={[Style.fontSize(15), fw_600, Style.textColor('#ffa62b')]}>{(amount * 1000) + ' VND'}</Text>
                 </>
             )
         }
@@ -114,12 +117,14 @@ export default function Widthdraw() {
             return
         }
         if (wallet && widthdrawAmount !== '') {
+
             WalletService.Shipper.createWithdrawRequest(
                 wallet.id,
                 widthdrawAmount,
                 (_withdraw) => setWithdraw(_withdraw),
                 (error) => ToastAndroid.show('Cannot create withdraw request:\nserver timeout ', ToastAndroid.LONG)
             )
+
         } else
             ToastAndroid.show('Cannot create withdraw request', ToastAndroid.LONG)
     }
@@ -188,7 +193,7 @@ export default function Widthdraw() {
                                     buttonStyle={[{ paddingVertical: 12 }, Style.borderRadius(100)]}
                                     color={'#2087d933'}
                                     titleStyle={Style.textColor('#2087d9')}
-                                    onPress={createWithdrawRequest}
+                                    onPress={() => setOtpModalVisible(true)}
                                 />
                                 : null
                         }
@@ -256,7 +261,167 @@ export default function Widthdraw() {
                     />
                     : null
             }
+            {
+                (otpModalVisible) ?
+                    <OTPModal
+                        visible={otpModalVisible}
+                        onRequestClose={() => setOtpModalVisible(false)}
+                        onOtpVerified={createWithdrawRequest}
+                    />
+                    : null
+            }
         </>
+    )
+}
+
+// ------------------------------------
+
+function OTPModal(props: {
+    visible: boolean,
+    onRequestClose: () => void,
+    onOtpVerified: () => void
+}) {
+    const [phone, setPhone] = useState<string>()
+    const [error, setError] = useState<string>('*Required')
+    const [otpError, setOtpError] = useState<string>('*Required')
+
+    const [otpConfirmation, setOtpConfirmation] = useState<FirebaseAuthTypes.ConfirmationResult>()
+    const [confirmedOtp, setConfirmedOtp] = useState<boolean>()
+
+    function onInputTyped(text: string) {
+        if (text.trim() === '') {
+            setError('*Required')
+            return
+        }
+
+        Validator.validatePhoneToCountryCode(
+            text,
+            (_phone) => {
+                setPhone(_phone)
+                setError('')
+            },
+            () => {
+                setPhone(undefined)
+                setError('Invalid phone number')
+            }
+        )
+    }
+
+    function sendOtp() {
+        setConfirmedOtp(false)
+
+        if (phone) {
+            auth().signInWithPhoneNumber(phone)
+                .then(res => {
+                    setOtpConfirmation(res)
+                    ToastAndroid.show('SMS has been sent!', ToastAndroid.LONG)
+                })
+                .catch(error => {
+                    console.log('>>> error sms: ', error)
+                    ToastAndroid.show('Failed to send sms!', ToastAndroid.LONG)
+                })
+        }
+    }
+
+    function onOtpTyped(text: string) {
+        text = text.trim()
+
+        if (text === '') {
+            setOtpError('*Required')
+            return
+        }
+
+        if (otpConfirmation && text.length === 6) {
+            otpConfirmation.confirm(text)
+                .then(_ => {
+                    setOtpError('')
+                    setConfirmedOtp(true)
+                })
+                .catch(error => {
+                    console.log('>>>>>> error: ', error)
+                    setOtpError('Incorrect OTP!')
+                    ToastAndroid.show(`Let's verify your phone again!`, ToastAndroid.LONG)
+                    setTimeout(props.onRequestClose, 2100)
+                })
+        }
+
+    }
+
+    return (
+        <Modal
+            visible={props.visible}
+            transparent
+            animationType='slide'
+        >
+            <View style={[flex_1, Style.backgroundColor('#ffddd233'), align_items_center, justify_center]}>
+                <Shadow
+                >
+                    <View style={[Style.backgroundColor('#fff'), Style.borderRadius(10), p_20, Style.width(350)]}>
+                        <Text style={[{ textAlign: 'center' }, fw_600, Style.fontSize(17)]}>Let's verify your phone first!</Text>
+
+                        {
+                            (!otpConfirmation) ?
+                                <>
+                                    <View style={mt_20}>
+                                        <TextInput
+                                            keyboardType='phone-pad'
+                                            placeholder='Your registered phone'
+                                            style={[Style.backgroundColor('#a9d6e56a'), Style.borderRadius(100), pl_15, pr_25]}
+                                            onChangeText={onInputTyped}
+                                        />
+                                        {
+                                            (phone !== undefined) ?
+                                                <Button
+                                                    title={"Verify"}
+                                                    buttonStyle={[Style.borderRadius(100), Style.height(46)]}
+                                                    containerStyle={[position_absolute, right_0]}
+                                                    onPress={sendOtp}
+                                                />
+                                                : null
+                                        }
+                                    </View>
+                                    <Text style={[Style.textColor('#bc4749'), ml_20, mt_5]}>{error}</Text>
+                                </>
+                                :
+                                <>
+                                    <TextInput
+                                        keyboardType='number-pad'
+                                        placeholder='Enter OTP'
+                                        style={[Style.backgroundColor('#a9d6e56a'), Style.borderRadius(100), pl_15, pr_25, mt_20]}
+                                        onChangeText={onOtpTyped}
+                                    />
+                                    {
+                                        (otpError === '') ?
+                                            <Text style={[Style.textColor('#274c77'), ml_20, mt_5]}>Verified</Text>
+                                            :
+                                            <Text style={[Style.textColor('#bc4749'), ml_20, mt_5]}>{otpError}</Text>
+                                    }
+                                </>
+                        }
+
+                        <View style={[flex_row, mt_15]}>
+                            <Button
+                                containerStyle={[flex_1]}
+                                title={'Close'}
+                                buttonStyle={[{ paddingVertical: 12 }, Style.borderRadius(100)]}
+                                color={'#2087d933'}
+                                titleStyle={Style.textColor('#2087d9')}
+                                onPress={props.onRequestClose}
+                            />
+                            <Button
+                                containerStyle={[flex_1, ml_10]}
+                                title={'Create Request'}
+                                buttonStyle={[{ paddingVertical: 12 }, Style.borderRadius(100)]}
+                                color={'#f7258533'}
+                                titleStyle={Style.textColor('#f72585')}
+                                onPress={props.onOtpVerified}
+                                disabled={otpError !== ''}
+                            />
+                        </View>
+                    </View>
+                </Shadow>
+            </View>
+        </Modal>
     )
 }
 

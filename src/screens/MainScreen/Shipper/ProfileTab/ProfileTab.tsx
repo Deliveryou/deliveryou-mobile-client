@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, StatusBar, ToastAndroid, Alert, DeviceEventEmitter, TouchableNativeFeedback, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, StatusBar, ToastAndroid, Alert, DeviceEventEmitter, RefreshControl, TouchableNativeFeedback, ScrollView } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Avatar, Button, Icon } from '@rneui/themed'
 import { AuthenticationService } from '../../../../services/AuthenticationService'
@@ -15,6 +15,8 @@ export default function ProfileTab() {
     const currentUser = useRef<GraphQLService.Type.User>();
     const [_refresh, setRefresh] = useState(0)
     const [wallet, setWallet] = useState<GraphQLService.Type.Wallet>()
+
+    const [refreshing, setRefreshing] = React.useState(false);
 
     const refresh = () => setRefresh(value => value + 1)
 
@@ -94,6 +96,12 @@ export default function ProfileTab() {
         navigation.navigate('ProfileEditor')
     }
 
+    function onRefresh() {
+        setRefreshing(true)
+        getWalletInfo()
+        setRefreshing(false)
+    }
+
     return (
         <View style={styles.rootContainer}>
             <View style={styles.profileImgContainer}>
@@ -140,7 +148,10 @@ export default function ProfileTab() {
                     </Shadow>
                 </View>
 
-                <ScrollView style={[flex_1]}>
+                <ScrollView
+                    style={[flex_1]}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                >
                     <TouchableNativeFeedback onPress={openProfileEditor}>
                         <View style={[flex_row, py_10, align_items_center, { paddingHorizontal: 30 }]}>
                             <Icon style={[Style.width(40), mr_10]} name='account-edit' type='material-community' color={'#3b75fa'} size={25} />

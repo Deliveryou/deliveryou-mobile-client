@@ -90,7 +90,9 @@ export namespace GraphQLService {
             id: number
             wallet: Wallet
             amount: number
-            creationTime: string
+            creationTime: string,
+            content?: string,
+            user: User
         }
     }
 

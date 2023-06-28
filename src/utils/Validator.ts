@@ -14,4 +14,21 @@ export default class Validator {
         const result: boolean = validateType.test(testAgainst);
         (result) ? onValidCallback?.() : onInvalidCallback?.()
     }
+
+    /**
+     * +84/0 -> 0
+     */
+    static validatePhoneToCountryCode(phone: string, onValid: (phone: string) => void, onInvalid?: () => void) {
+        this.validate(
+            this.TYPE.PHONE.VN,
+            phone,
+            () => {
+                if (phone.charAt(0) === '0') {
+                    phone = '+84' + phone.substring(1)
+                }
+                onValid(phone)
+            },
+            onInvalid
+        )
+    }
 }

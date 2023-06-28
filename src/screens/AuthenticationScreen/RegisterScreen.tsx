@@ -384,20 +384,22 @@ function Tab3(props: {
         setConfirmedOtp(false)
         setOtpError(undefined)
 
-        if (text.trim() === '') {
+        text = text.trim()
+
+        if (text === '') {
             setPhoneError('*Required')
             return
         }
 
         Validator.validate(
-            Validator.TYPE.PHONE.COUNTRY_CODE_VN,
+            Validator.TYPE.PHONE.VN,
             text,
             () => {
                 setPhoneError('')
                 setPhone(text)
             },
             () => {
-                setPhoneError('Invalid phone number (+84)')
+                setPhoneError('Invalid phone number')
                 setPhone(undefined)
             }
         )
@@ -408,7 +410,9 @@ function Tab3(props: {
         setConfirmedOtp(false)
 
         if (phone) {
-            auth().signInWithPhoneNumber(phone)
+            const sphone = phone.replace(/^(0|84)/, '+84')
+            console.log('>>>>> phone: ', sphone)
+            auth().signInWithPhoneNumber(sphone)
                 .then(res => {
                     setOtpConfirmation(res)
                     ToastAndroid.show('SMS has been sent!', ToastAndroid.LONG)

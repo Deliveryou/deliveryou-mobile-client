@@ -55,6 +55,7 @@ import WalletSend from './src/screens/MainScreen/Shipper/ProfileTab/WalletSend';
 import Widthdraw from './src/screens/MainScreen/Shipper/ProfileTab/Widthdraw';
 import WalletHistory from './src/screens/MainScreen/Shipper/ProfileTab/WalletHistory';
 import RegisterScreen from './src/screens/AuthenticationScreen/RegisterScreen';
+import RateDriver from './src/screens/MainScreen/Common/Acitivity/RateDriver';
 
 // ----------------------------------------------
 
@@ -104,6 +105,13 @@ const MainScreen = () => {
             <Stack.Screen
               name='UserReports'
               component={UserReports}
+              options={{
+                animation: 'slide_from_right',
+              }}
+            />
+            <Stack.Screen
+              name='RateDriver'
+              component={RateDriver}
               options={{
                 animation: 'slide_from_right',
               }}

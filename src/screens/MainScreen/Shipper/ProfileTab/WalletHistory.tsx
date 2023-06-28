@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, StatusBar, ToastAndroid, FlatList, ListRenderItemInfo } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Style, align_items_center, flex_1, flex_row, fw_600, fw_bold, mb_10, mb_20, mt_10, mx_10, mx_20, p_5, px_15, px_25, py_10 } from '../../../../stylesheets/primary-styles';
+import { Style, align_items_center, bg_black, bg_danger, flex_1, flex_row, fw_500, fw_600, fw_700, fw_bold, mb_10, mb_20, mt_10, mx_10, mx_20, p_10, p_5, px_15, px_25, py_10 } from '../../../../stylesheets/primary-styles';
 import { Shadow } from 'react-native-shadow-2';
 import { Avatar, ListItem } from '@rneui/themed';
 import { GraphQLService } from '../../../../services/GraphQLService';
@@ -22,9 +22,10 @@ function HistoryListItem(props: ListRenderItemInfo<GraphQLService.Type.Transacti
                 size={35}
             />
             <ListItem.Content>
-                <ListItem.Title style={[Style.textColor(iconBgColor), fw_bold, Style.fontSize(18)]}>{item.amount}</ListItem.Title>
-                <ListItem.Subtitle style={[Style.textColor('#463f3a')]}>{item.creationTime}</ListItem.Subtitle>
+                <ListItem.Title style={[Style.textColor('#463f3a'), fw_700]}>{item.creationTime}</ListItem.Title>
+                <ListItem.Subtitle style={[Style.textColor('#463f3a')]}>{item.content}</ListItem.Subtitle>
             </ListItem.Content>
+            <ListItem.Title style={[Style.textColor(iconBgColor), fw_bold, Style.fontSize(18)]}>{item.amount}</ListItem.Title>
         </ListItem>
     )
 }
@@ -57,7 +58,10 @@ export default function WalletHistory() {
         if (wallet) {
             WalletService.Common.getHistory(
                 wallet.id,
-                (list) => setTransactionList(list),
+                (list) => {
+                    console.log('>>>>>>>>> list: ', list)
+                    setTransactionList(list)
+                },
                 (error) => ToastAndroid.show('Cannot load history: server timeout', ToastAndroid.LONG)
             )
         }

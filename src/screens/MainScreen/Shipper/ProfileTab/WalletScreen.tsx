@@ -104,7 +104,7 @@ export default function WalletScreen() {
                         buttonStyle={[align_items_start]}
                     >
                         <Text style={[mr_10, Style.fontSize(15), fw_600, text_white, mb_5]}>Exchange Rate:</Text>
-                        <Text style={[Style.fontSize(15), text_white, flex_1]}>{wallet.credit} credits = {wallet.credit * 100} VND</Text>
+                        <Text style={[Style.fontSize(15), text_white, flex_1]}>{wallet.credit} credits = {wallet.credit * 1000} VND</Text>
                     </FunctionalButton>
                     : null
             }

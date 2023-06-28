@@ -83,9 +83,17 @@ export default function AddDeliveryDetails(props: AddDeliveryDetailsProps) {
 
     function findDriver() {
         validatePersonInfo(senderInfo.current, 'Sender')
-            .then(() => {
+            .then((passed1: boolean) => {
+
+                if (passed1 === false)
+                    return
+
                 validatePersonInfo(recipientInfo.current, 'Recipient')
-                    .then(() => {
+                    .then((passed2: boolean) => {
+
+                        if (passed2 === false)
+                            return
+
                         if (photoUri.current) {
                             console.log('---------- uri: ', photoUri.current)
                             ImageUploadService.upload(photoUri.current, {
@@ -336,7 +344,7 @@ function Tab1(props: Tab1Props) {
             })
     }, [])
 
-    const deliveryPrice = Math.floor(props.deliveryPrice.current.price)
+    const deliveryPrice = Math.floor(props.deliveryPrice.current.price / 1000) * 1000
     const discount: number = (props.promotion.current) ? props.promotion.current.discountPercentage : 0
     let promoPrice = Math.floor(discount * deliveryPrice)
     const maxDiscount: number = (props.promotion.current) ? props.promotion.current.maximumDiscountAmount : Number.MAX_VALUE
@@ -437,7 +445,7 @@ function Tab1(props: Tab1Props) {
                     <View style={[flex_row, Style.borderRadius(10), mt_5]}>
                         <Text style={{ flexGrow: 1 }}>Total:</Text>
                         <View style={flex_row}>
-                            <Text style={[fw_bold, Style.textColor('#0077b6'), Style.fontSize(15)]}>{deliveryPrice - promoPrice}</Text>
+                            <Text style={[fw_bold, Style.textColor('#0077b6'), Style.fontSize(15)]}>{Math.floor((deliveryPrice - promoPrice) / 1000) * 1000}</Text>
                             <Text> VND</Text>
                         </View>
                     </View>

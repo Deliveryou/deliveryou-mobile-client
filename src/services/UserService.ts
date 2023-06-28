@@ -109,4 +109,22 @@ export namespace UserService {
             .then(data => onResponse?.(data.updated))
             .catch(error => onFailure?.(error))
     }
+
+    export function rateShipper(rating: number, content: string | undefined, packageId: number, onSuccess: () => void, onError?: (error: any) => void) {
+        const uploadObj = {
+            rating,
+            content
+        }
+
+        APIService.axios(`/api/user/rate-shipper/${packageId}`, 'post', uploadObj)
+            .then(response => onSuccess())
+            .catch(error => onError?.(error))
+    }
+
+    export function canRateShiper(packageId: number, onCan: () => void, onError?: (error: any) => void) {
+        APIService.axios(`/api/user/can-rate-shipper/${packageId}`)
+            .then(response => onCan())
+            .catch(error => onError?.(error))
+    }
+
 }

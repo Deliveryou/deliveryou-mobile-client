@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, StatusBar, ToastAndroid, TextInput, TouchableOp
 import React, { useEffect, useRef, useState } from 'react'
 import { GraphQLService } from '../../../../services/GraphQLService';
 import { useNavigation, useRoute } from '@react-navigation/native'
-import { Style, align_items_center, flex_1, flex_row, fw_500, fw_600, fw_bold, justify_center, m_5, mb_20, ml_10, mr_5, mt_10, mt_15, mt_20, mt_5, mx_10, mx_5, my_10, p_0, p_10, p_5, pl_15, position_absolute, px_10, px_15, py_10, py_5, right_0, text_white, w_100 } from '../../../../stylesheets/primary-styles';
+import { Style, align_items_center, border_radius_pill, flex_1, flex_row, fw_500, fw_600, fw_bold, justify_center, m_5, mb_10, mb_20, ml_10, mr_5, mt_10, mt_15, mt_20, mt_25, mt_5, mx_10, mx_5, my_10, p_0, p_10, p_5, pl_15, position_absolute, px_10, px_15, py_10, py_20, py_5, right_0, text_white, w_100 } from '../../../../stylesheets/primary-styles';
 import { Shadow } from 'react-native-shadow-2';
 import { Avatar, Button, Icon } from '@rneui/themed';
 import Validator from '../../../../utils/Validator';
@@ -66,8 +66,8 @@ export default function WalletSend() {
                 return
             }
 
-            if (amountToGift < 100) {
-                ToastAndroid.show('The minimum credit to gift is 100', ToastAndroid.LONG)
+            if (amountToGift < 10) {
+                ToastAndroid.show('The minimum credit to gift is 10', ToastAndroid.LONG)
                 return
             } else if (amountToGift > wallet.credit) {
                 ToastAndroid.show("Don't have enough credit to gift", ToastAndroid.LONG)
@@ -122,10 +122,10 @@ export default function WalletSend() {
                 containerStyle={w_100}
                 style={w_100}
             >
-                <View style={[Style.borderRadius(10), p_10]}>
+                <View style={[Style.borderRadius(10), py_20, px_10]}>
                     <View style={[flex_row, align_items_center]}>
                         <Text style={[Style.fontSize(16), fw_500]}>Available credits:</Text>
-                        <Text style={[ml_10, Style.fontSize(16)]}>{wallet?.credit}</Text>
+                        <Text style={[ml_10, Style.fontSize(16), border_radius_pill, px_15, py_5, Style.backgroundColor('#219ebc'), text_white, fw_bold]}>{wallet?.credit}</Text>
                     </View>
 
                     <View style={[Style.backgroundColor('#d3d3d3'), Style.borderRadius(100), mt_15]}>
@@ -219,11 +219,26 @@ export default function WalletSend() {
             <Shadow
                 startColor={'#ced4dacc'}
                 distance={8}
-                containerStyle={[w_100, mt_20]}
+                containerStyle={[w_100, mt_25]}
                 style={w_100}
             >
-                <View style={[Style.borderRadius(10), p_10]}>
-                    <Text>Instructions:</Text>
+                <View style={[Style.borderRadius(10), py_20, px_10]}>
+                    <Text style={[Style.fontSize(16), fw_500, Style.textColor('#0081a7')]}>Instructions:</Text>
+                    <View style={[pl_15, mt_10]}>
+                        <View style={[flex_row]}>
+                            <Icon name='numeric-1-circle-outline' type='material-community' color={'#00afb9'} />
+                            <Text style={[flex_1, ml_10, Style.fontSize(15)]}>Enter the shipper's phone number to which you want to gift credits</Text>
+                        </View>
+                        <View style={[flex_row, mt_10]}>
+                            <Icon name='numeric-2-circle-outline' type='material-community' color={'#00afb9'} />
+                            <Text style={[flex_1, ml_10, Style.fontSize(15)]}>Select the RIGHT shipper and re-check their information</Text>
+                        </View>
+                        <View style={[flex_row, mt_10]}>
+                            <Icon name='numeric-3-circle-outline' type='material-community' color={'#00afb9'} />
+                            <Text style={[flex_1, ml_10, Style.fontSize(15)]}>Enter the amount of credit to gift.</Text>
+                        </View>
+                        <Text style={[mt_15, mb_10, fw_bold, Style.textColor('#ff006e')]}>You are RESPONSIBLE for this entire process, ensure the colleague's information are all correct!</Text>
+                    </View>
                 </View>
             </Shadow>
 

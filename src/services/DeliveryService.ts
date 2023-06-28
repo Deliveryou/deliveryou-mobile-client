@@ -69,6 +69,12 @@ export namespace DeliveryService {
                 .then(dpackage => onSuccess(dpackage))
                 .catch(error => onFailure?.(error))
         }
+
+        export function cancelWaiting(packageId: number, onSuccess: () => void, onFailure?: (error: any) => void) {
+            APIService.axios(`/api/user/cancel-waiting/${packageId}`)
+                .then(response => onSuccess())
+                .catch(error => onFailure?.(error))
+        }
     }
 
     export namespace Common {

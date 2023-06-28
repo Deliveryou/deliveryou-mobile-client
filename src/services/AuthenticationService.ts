@@ -3,6 +3,7 @@ import { APIService } from "./APIService";
 import RNSecureKeyStore, { ACCESSIBLE } from "react-native-secure-key-store";
 import { Alert, DeviceEventEmitter, ToastAndroid } from "react-native";
 import { GraphQLService } from "./GraphQLService";
+import RNRestart from 'react-native-restart';
 
 export namespace AuthenticationService {
     export function login(phone: string, password: string, onLogInSuccessfully?: (response: LogInResponse) => void, onLogInFailure?: (error?: AxiosError | string) => void) {
@@ -26,9 +27,10 @@ export namespace AuthenticationService {
 
         axios(config)
             .then(function (response) {
-                if (response.status === 200)
+                if (response.status === 200) {
                     onLogInSuccessfully?.(response.data as LogInResponse)
-                else
+                    RNRestart.restart()
+                } else
                     onLogInFailure?.(`Expected code 200 but recieved ${response.status} instead`)
             })
             .catch(function (error) {
@@ -145,6 +147,7 @@ export namespace AuthenticationService {
                     () => {
                         onSuccess?.()
                         DeviceEventEmitter.emit('event.app.authenticationState', true)
+                        RNRestart.restart()
                     },
                     (error) => {
                         onError?.(error)
